@@ -8,10 +8,16 @@ Chat application developed using [Nest](https://github.com/nestjs/nest) framewor
 Clone the code from [This Repository](https://github.com/toseef-ahmd/chat-app-backend) using the commmand
 
 ```bash
-$ git clone [](https://github.com/toseef-ahmd/chat-app-backend)
+$ git clone https://github.com/toseef-ahmd/chat-app-backend
 ```
 ## Installation
-After you have cloned the repository, Navigate to chat-app-backend and Run
+After you have cloned the repository, Navigate to chat-app-backend using
+
+```bash
+$ cd chat-app-backend
+```
+
+Run
 
 ```bash
 $ npm install
@@ -27,7 +33,21 @@ In order to create the database and dump data into collections, you need followi
 1.  MongoDB Client. (Installed when you run ```npm install```)
 2.  Docker. [Docker Download Page](https://www.docker.com/products/docker-desktop/#)
 3.  Docker Compose file. Provided in the code repository.
-     
+4.  **dbdump.js** file provided in the root directory of the code repository.
+5.  MonngoDB Compass [Here](https://www.mongodb.com/try/download/compass) or Studio 3T [Here](https://studio3t.com/download/)
+
+Once you are in the root directory of the project, run
+
+```bash
+$ docker-compose up -d
+```
+This will setup a database in the docker container.
+
+Once it is created, run
+
+```bash
+$ node dbdump.js
+```
 
 
 
