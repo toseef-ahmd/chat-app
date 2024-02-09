@@ -4,19 +4,34 @@
 
 Chat application developed using [Nest](https://github.com/nestjs/nest) framework and TypeScript
 
+## Code Repository
+Clone the code from [This Repository](https://github.com/toseef-ahmd/chat-app-backend) using the commmand
 
-## Installation
-Clone the repository
 ```bash
-$  cd chat-app-backend
+$ git clone [](https://github.com/toseef-ahmd/chat-app-backend)
 ```
-Run
+## Installation
+After you have cloned the repository, Navigate to chat-app-backend and Run
 
 ```bash
 $ npm install
 ```
+This will install the dependencies as defined in **_Package.json_** file.
 
 ## Running the app
+
+As of now, we have only created the Database schema, so you do not need to run the entire application. We have provided a **dbdump.js** file which you can use to populate data into MongoDB.
+
+In order to create the database and dump data into collections, you need following tools.
+
+1.  MongoDB Client. (Installed when you run ```npm install```)
+2.  Docker. [Docker Download Page](https://www.docker.com/products/docker-desktop/#)
+3.  Docker Compose file. Provided in the code repository.
+     
+
+
+
+For the APIs and other functionalities, you would run following commands.
 
 ```bash
 # development
