@@ -8,7 +8,7 @@ import { GroupModule } from './group/group.module';
 import { MessageModule } from './message/message.module';
 
 @Module({
-  imports: [UsersModule, MongooseModule.forRoot('mongodb://localhost/nest')],
+  imports: [MongooseModule.forRoot('mongodb://localhost/nest')],
   controllers: [AppController],
   providers: [AppService],
 })
