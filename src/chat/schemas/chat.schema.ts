@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
 
@@ -14,7 +15,12 @@ export class Chat extends Document {
   })
   members: Types.ObjectId[];
 
-  // Reference to a Group document for group chats
+  @Prop({
+    type: [{ type: Types.ObjectId, ref: 'Message' }],
+    default: [],
+  })
+  messages: Types.ObjectId[];
+
   @Prop({
     type: Types.ObjectId,
     ref: 'Group',

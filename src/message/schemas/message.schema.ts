@@ -4,9 +4,6 @@ import { Document, Types } from 'mongoose';
 
 @Schema()
 export class Message extends Document {
-  @Prop({ type: Types.ObjectId, ref: 'Chat', required: true })
-  chat: Types.ObjectId;
-
   @Prop({ type: Types.ObjectId, ref: 'User', required: true })
   sender: Types.ObjectId;
 
@@ -16,8 +13,11 @@ export class Message extends Document {
   @Prop({ default: Date.now })
   sentAt: Date;
 
-  @Prop()
-  messageType: string;
+  @Prop({ enum: ['read', 'unread'], required: true, default: 'unread'})
+  type: string;
+
+  @Prop({ type: Types.ObjectId, ref: 'User', required: true })
+  seenBy: Types.ObjectId[];
 }
 
 export const MessageSchema = SchemaFactory.createForClass(Message);
