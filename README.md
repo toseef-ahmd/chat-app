@@ -31,10 +31,10 @@ As of now, we have only created the Database schema, so you do not need to run t
 In order to create the database and dump data into collections, you need following tools.
 
 1.  MongoDB Client. (Installed when you run ```npm install```)
-2.  Docker. [Here](https://www.docker.com/products/docker-desktop/#)
-3.  Docker Compose file. Provided in the code repository.
-4.  **dbdump.js** file provided in the root directory of the code repository.
-5.  MonngoDB Compass [Here](https://www.mongodb.com/try/download/compass) or Studio 3T [Here](https://studio3t.com/download/)
+2.  Docker. [(Here)](https://www.docker.com/products/docker-desktop/#)
+3.  Docker Compose file. (Provided in the code repository.)
+4.  **dbdump.js** file. (Provided in the root directory of the code repository.)
+5.  MonngoDB Compass [(Here)](https://www.mongodb.com/try/download/compass) or Studio 3T [(Here)](https://studio3t.com/download/)
 
 Once you are in the root directory of the project, run
 
@@ -49,7 +49,19 @@ Once it is created, run
 $ node dbdump.js
 ```
 
+Open MongoDB Compass or Studio 3T (Whichever you have downloaded), and create a new connection using following parameters.
 
+1.  **Host:** localhost
+2.  **PORT:** 27017
+3.  **DB_NAME:** chatapp
+4.  **username:** rootuser
+5.  **password:** rootpass
+
+Here is the connection string that you may use in the connection manager.
+
+```bash
+$  mongodb://rootuser@localhost:27017/chatapp
+```
 
 For the APIs and other functionalities, you would run following commands.
 
