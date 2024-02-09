@@ -2,9 +2,15 @@
 
 ## Description
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+Chat application developed using [Nest](https://github.com/nestjs/nest) framework and TypeScript
+
 
 ## Installation
+Clone the repository
+```bash
+$  cd chat-app-backend
+```
+Run
 
 ```bash
 $ npm install
