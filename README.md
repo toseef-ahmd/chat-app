@@ -60,7 +60,7 @@ Open MongoDB Compass or Studio 3T (Whichever you have downloaded), and create a 
 Here is the connection string that you may use in the connection manager.
 
 ```bash
-$  mongodb://rootuser@localhost:27017/chatapp
+$  mongodb://rootuser@localhost:27017/admin
 ```
 
 For the APIs and other functionalities, you would run following commands.
