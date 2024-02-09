@@ -31,7 +31,7 @@ As of now, we have only created the Database schema, so you do not need to run t
 In order to create the database and dump data into collections, you need following tools.
 
 1.  MongoDB Client. (Installed when you run ```npm install```)
-2.  Docker. [Docker Download Page](https://www.docker.com/products/docker-desktop/#)
+2.  Docker. [Here](https://www.docker.com/products/docker-desktop/#)
 3.  Docker Compose file. Provided in the code repository.
 4.  **dbdump.js** file provided in the root directory of the code repository.
 5.  MonngoDB Compass [Here](https://www.mongodb.com/try/download/compass) or Studio 3T [Here](https://studio3t.com/download/)
