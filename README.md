@@ -63,6 +63,7 @@ Here is the connection string that you may use in the connection manager.
 $  mongodb://rootuser@localhost:27017/admin
 ```
 
+Once you are logged in, you would be able to view the collections and data inside them.
 
 ## License
 
