@@ -13,8 +13,14 @@ Clone the code from [This Repository](https://github.com/toseef-ahmd/chat-app-ba
 ```bash
 $ git clone https://github.com/toseef-ahmd/chat-app-backend
 ```
-
 ## Installation
+After you have cloned the repository, Navigate to chat-app-backend using
+
+```bash
+$ cd chat-app-backend
+```
+
+Run
 
 After you have cloned the repository, Navigate to chat-app-backend using
 
@@ -27,6 +33,7 @@ Run
 ```bash
 $ npm install
 ```
+This will install the dependencies as defined in **_Package.json_** file.
 
 This will install the dependencies as defined in **_Package.json_** file.
 
@@ -36,7 +43,8 @@ As of now, we have only created the Database schema, so you do not need to run t
 
 In order to create the database and dump data into collections, you need following tools.
 
-1.  MongoDB Client. (Installed when you run `npm install`)
+
+1.  MongoDB Client. (Installed when you run ```npm install```)
 2.  Docker. [(Here)](https://www.docker.com/products/docker-desktop/#)
 3.  Docker Compose file. (Provided in the code repository.)
 4.  **dbdump.js** file. (Provided in the root directory of the code repository.)
