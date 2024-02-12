@@ -72,6 +72,9 @@ $  mongodb://rootuser@localhost:27017/admin
 
 Once you are logged in, you would be able to view the collections and data inside them.
 
+Here is the ER diagrams of the database:
+![alt text](images/ERD.png)
+
 ## License
 
 Nest is [MIT licensed](LICENSE).
