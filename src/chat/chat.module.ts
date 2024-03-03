@@ -1,7 +1,7 @@
 /* eslint-disable prettier/prettier */
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
-import { Chat, ChatSchema } from 'src/schemas/chat.schema';
+import { Chat, ChatSchema } from './schemas/chat.schema';
 
 @Module({
     imports: [
