@@ -3,6 +3,15 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { Document } from 'mongoose';
 
+
+// user-status.enum.ts
+export enum UserStatus {
+  Offline = 0,
+  Online = 1,
+  Typing = 2,
+}
+
+
 @Schema()
 export class User extends Document {
   @Prop({ unique: true, required: true })
@@ -24,9 +33,9 @@ export class User extends Document {
   avatar: string;
 
   @Prop({
-    enum: ['online', 'offline', 'typing'],
+    enum: UserStatus,
     required: true,
-    default: 'offline',
+    default: UserStatus.Offline,
   })
   status: string;
 
