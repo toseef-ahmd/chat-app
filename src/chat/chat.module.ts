@@ -6,11 +6,11 @@ import { ChatController } from './chat.controller';
 import { ChatService } from './chat.service';
 
 @Module({
-    imports: [
-        MongooseModule.forFeature([{ name: Chat.name, schema: ChatSchema }])
-    ],
-    controllers: [ChatController], 
-    providers: [ChatService],
-    exports: []
+  imports: [
+    MongooseModule.forFeature([{ name: Chat.name, schema: ChatSchema }]),
+  ],
+  controllers: [ChatController],
+  providers: [ChatService],
+  exports: [],
 })
 export class ChatModule {}

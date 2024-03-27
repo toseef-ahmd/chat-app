@@ -7,11 +7,11 @@ import { GroupController } from './group.controller';
 import { GroupService } from './group.service';
 
 @Module({
-    imports: [
-        MongooseModule.forFeature([{ name: Group.name, schema: GroupSchema }])
-      ],
-    controllers: [GroupController], 
-    providers: [GroupService],
-    exports: []
+  imports: [
+    MongooseModule.forFeature([{ name: Group.name, schema: GroupSchema }]),
+  ],
+  controllers: [GroupController],
+  providers: [GroupService],
+  exports: [],
 })
 export class GroupModule {}

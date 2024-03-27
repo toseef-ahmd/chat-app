@@ -1,6 +1,14 @@
 /* eslint-disable prettier/prettier */
 // update-user.dto.ts
-import { IsEnum, IsInt, IsOptional, IsString, IsUrl, MaxLength, MinLength } from 'class-validator';
+import {
+  IsEnum,
+  IsInt,
+  IsOptional,
+  IsString,
+  IsUrl,
+  MaxLength,
+  MinLength,
+} from 'class-validator';
 import { UserStatus } from 'src/user/schemas/user.schema';
 
 export class UpdateUserDto {
