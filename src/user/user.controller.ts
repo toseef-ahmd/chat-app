@@ -17,26 +17,26 @@ export class UserController {
 
   @Post()
   create(@Body() createUserDto: any) {
-    return this.userService.createUser(createUserDto);
+    return this.userService.create(createUserDto);
   }
 
   @Get()
   findAll() {
-    return this.userService.findAllUsers();
+    return this.userService.findAll();
   }
 
   @Get(':userID')
   findOne(@Param('userID') userID: string) {
-    return this.userService.findOneUser(userID);
+    return this.userService.findOne(userID);
   }
 
   @Put(':userID')
   update(@Param('userID') userID: string, @Body() updateUserDto: any) {
-    return this.userService.updateUser(userID, updateUserDto);
+    return this.userService.update(userID, updateUserDto);
   }
 
   @Delete(':userID')
   remove(@Param('userID') userID: string) {
-    return this.userService.removeUser(userID);
+    return this.userService.remove(userID);
   }
 }

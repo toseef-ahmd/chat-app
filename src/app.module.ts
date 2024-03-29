@@ -9,6 +9,7 @@ import { GroupModule } from './group/group.module';
 import { MessageModule } from './message/message.module';
 import { ConfigModule } from '@nestjs/config';
 import { ConfigService } from '@nestjs/config';
+import { YModule } from './y/y.module';
 
 // const MONGO_DB_HOST = process.env.MONGO_DB_HOST || 'localhost'
 // const MONGO_DB_PORT = process.env.MONGO_DB_PORT || '27017'
@@ -36,7 +37,7 @@ import { ConfigService } from '@nestjs/config';
     ChatModule, // Import ChatModule
     UserModule, // Import UserModule
     GroupModule, // Import GroupModule
-    MessageModule, // Import MessageModule
+    MessageModule, YModule, // Import MessageModule
   ],
   controllers: [AppController],
   providers: [AppService],

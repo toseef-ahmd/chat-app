@@ -7,27 +7,31 @@ import { User, UserDocument } from './schemas/user.schema'; // Correct import he
 
 @Injectable()
 export class UserService {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  createUser(_createUserDto: { username: string; password: string; email: string; }): any {
+    throw new Error('Method not implemented.');
+  }
   constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) {} // Correct type here
 
-  async createUser(createUserDto: any): Promise<User> {
-    const newUser = new this.userModel(createUserDto);
-    return await newUser.save();
+  async create(createUserDto: any): Promise<User> {
+    return await this.userModel.create(createUserDto);
+    
   }
 
-  async findAllUsers(): Promise<User[]> {
+  async findAll(): Promise<User[]> {
     return await this.userModel.find();
   }
 
-  async findOneUser(userID: string): Promise<User | null> {
+  async findOne(userID: string): Promise<User | null> {
     return await this.userModel.findOne({ userID });
   }
 
-  async updateUser(userID: string, updateUserDto: any): Promise<User | null> {
+  async update(userID: string, updateUserDto: any): Promise<User | null> {
     return await this.userModel
       .findOneAndUpdate({ userID }, updateUserDto, { new: true })
   }
 
-  async removeUser(userID: string): Promise<any> {
+  async remove(userID: string): Promise<any> {
     return await this.userModel.deleteOne({ userID });
   }
 }
