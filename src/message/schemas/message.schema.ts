@@ -13,7 +13,7 @@ export class Message extends Document {
   @Prop({ default: Date.now })
   sentAt: Date;
 
-  @Prop({ enum: ['read', 'unread'], required: true, default: 'unread'})
+  @Prop({ enum: ['read', 'unread'], required: true, default: 'unread' })
   type: string;
 
   @Prop({ type: Types.ObjectId, ref: 'User', required: true })
