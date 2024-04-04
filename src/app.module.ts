@@ -1,5 +1,5 @@
 /* eslint-disable prettier/prettier */
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -9,16 +9,8 @@ import { GroupModule } from './group/group.module';
 import { MessageModule } from './message/message.module';
 import { ConfigModule } from '@nestjs/config';
 import { ConfigService } from '@nestjs/config';
-import { YModule } from './y/y.module';
+import { AuthMiddleware } from './middlewares/auth/auth.middleware';
 
-// const MONGO_DB_HOST = process.env.MONGO_DB_HOST || 'localhost'
-// const MONGO_DB_PORT = process.env.MONGO_DB_PORT || '27017'
-// const MONGO_DB_NAME = process.env.MONGO_DB_NAME || 'nest'
-// const MONGO_DB_USER = process.env.MONGO_DB_USER || 'root'
-// const MONGO_DB_PASSWORD = process.env.MONGO_DB_PASSWORD || 'root'
-
-// const MONGO_DB_URI = `mongodb+srv://${MONGO_DB_USER}:${MONGO_DB_PASSWORD}@${MONGO_DB_HOST}:${MONGO_DB_PORT}/${MONGO_DB_NAME}?authSource=admin`
-// console.log(MONGO_DB_URI)
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -37,9 +29,20 @@ import { YModule } from './y/y.module';
     ChatModule, // Import ChatModule
     UserModule, // Import UserModule
     GroupModule, // Import GroupModule
-    MessageModule, YModule, // Import MessageModule
+    MessageModule, // Import MessageModule
   ],
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer
+      .apply(AuthMiddleware)
+      // .forRoutes({ path: '*', method: RequestMethod.ALL }); // Apply for all routes
+      // Alternatively, apply middleware to specific routes:
+      .forRoutes(AppController); // Apply only to AppController routes
+      // Or use strings for the controller path
+      // .forRoutes('app'); // Apply to routes starting with 'app'
+  }
+}

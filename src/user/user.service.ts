@@ -4,34 +4,52 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { User, UserDocument } from './schemas/user.schema'; // Correct import here
+import { DeleteResult } from 'mongodb';
+import { UpdateUserDto } from './dto/update-user.dto/update-user.dto';
 
 @Injectable()
 export class UserService {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  createUser(_createUserDto: { username: string; password: string; email: string; }): any {
-    throw new Error('Method not implemented.');
-  }
   constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) {} // Correct type here
 
   async create(createUserDto: any): Promise<User> {
-    return await this.userModel.create(createUserDto);
+    try {
+      return await this.userModel.create(createUserDto);
+    } catch (error) {
+      return error
+    }
+  }
+
+  async findAll(): Promise<Array<User>> {
+    try {
+      return await this.userModel.find();
+    } catch (error) {
+      return error;
+    }
     
   }
 
-  async findAll(): Promise<User[]> {
-    return await this.userModel.find();
+  async findOne(userID: string): Promise<User> {
+    try {
+      return await this.userModel.findById(userID).exec();
+    } catch (error) {
+      throw new Error(error);
+    }
+  }
+  
+  async update(userID: string, updateUserDto: UpdateUserDto): Promise<User> {
+    try {
+      return await this.userModel.findByIdAndUpdate(userID, updateUserDto, { new: true }).exec();
+    } catch (error) {
+      throw new Error(error);
+    }
   }
 
-  async findOne(userID: string): Promise<User | null> {
-    return await this.userModel.findOne({ userID });
-  }
-
-  async update(userID: string, updateUserDto: any): Promise<User | null> {
-    return await this.userModel
-      .findOneAndUpdate({ userID }, updateUserDto, { new: true })
-  }
-
-  async remove(userID: string): Promise<any> {
-    return await this.userModel.deleteOne({ userID });
+  async remove(userID: string): Promise<DeleteResult> {
+    try {
+      return await this.userModel.deleteOne({ userID });
+    } catch (error) {
+      return error;
+    }
+    
   }
 }
