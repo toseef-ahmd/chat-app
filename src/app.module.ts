@@ -34,7 +34,6 @@ import { AuthMiddleware } from './middlewares/auth/auth.middleware';
   controllers: [AppController],
   providers: [AppService],
 })
-
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
     consumer
@@ -42,7 +41,7 @@ export class AppModule implements NestModule {
       // .forRoutes({ path: '*', method: RequestMethod.ALL }); // Apply for all routes
       // Alternatively, apply middleware to specific routes:
       .forRoutes(AppController); // Apply only to AppController routes
-      // Or use strings for the controller path
-      // .forRoutes('app'); // Apply to routes starting with 'app'
+    // Or use strings for the controller path
+    // .forRoutes('app'); // Apply to routes starting with 'app'
   }
 }
