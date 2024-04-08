@@ -1,55 +1,48 @@
-/* eslint-disable prettier/prettier */
-// user.service.ts
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { User, UserDocument } from './schemas/user.schema'; // Correct import here
+import { User, UserDocument } from './schemas/user.schema';
 import { DeleteResult } from 'mongodb';
 import { UpdateUserDto } from './dto/update-user.dto/update-user.dto';
+import { CreateUserDto } from './dto/create-user.dto/create-user.dto';
 
 @Injectable()
 export class UserService {
-  constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) {} // Correct type here
+  constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) {}
 
-  async create(createUserDto: any): Promise<User> {
-    try {
-      return await this.userModel.create(createUserDto);
-    } catch (error) {
-      return error
+  async create(createUserDto: CreateUserDto): Promise<User> {
+    const createdUser = await this.userModel.create(createUserDto);
+    if (!createdUser) {
+      throw new NotFoundException('Failed to create user');
     }
+    return createdUser;
   }
 
   async findAll(): Promise<Array<User>> {
-    try {
-      return await this.userModel.find();
-    } catch (error) {
-      return error;
-    }
-    
+    const users = await this.userModel.find().exec();
+    return users; // No longer throw if no users, return empty array
   }
 
-  async findOne(userID: string): Promise<User> {
-    try {
-      return await this.userModel.findById(userID).exec();
-    } catch (error) {
-      throw new Error(error);
-    }
+  async findOne(userID: string): Promise<User | null> {
+    const user = await this.userModel.findById(userID).exec();
+    return user || null; // Return null instead of throwing if not found
   }
-  
-  async update(userID: string, updateUserDto: UpdateUserDto): Promise<User> {
-    try {
-      return await this.userModel.findByIdAndUpdate(userID, updateUserDto, { new: true }).exec();
-    } catch (error) {
-      throw new Error(error);
-    }
+
+  async update(
+    userID: string,
+    updateUserDto: UpdateUserDto,
+  ): Promise<User | null> {
+    const updatedUser = await this.userModel
+      .findByIdAndUpdate(userID, updateUserDto, { new: true })
+      .exec();
+    return updatedUser || null; // Return null instead of throwing if not found
   }
 
   async remove(userID: string): Promise<DeleteResult> {
-    try {
-      return await this.userModel.deleteOne({ userID });
-    } catch (error) {
-      return error;
+    const result = await this.userModel.deleteOne({ _id: userID });
+    if (result.deletedCount === 0) {
+      throw new NotFoundException(`User with ID ${userID} not found`);
     }
-    
+    return result;
   }
 }

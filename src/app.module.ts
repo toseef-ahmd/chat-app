@@ -1,5 +1,5 @@
-/* eslint-disable prettier/prettier */
-import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
+// app.module.ts
+import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -7,41 +7,38 @@ import { ChatModule } from './chat/chat.module';
 import { UserModule } from './user/user.module';
 import { GroupModule } from './group/group.module';
 import { MessageModule } from './message/message.module';
-import { ConfigModule } from '@nestjs/config';
-import { ConfigService } from '@nestjs/config';
-import { AuthMiddleware } from './middlewares/auth/auth.middleware';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { PassportModule } from '@nestjs/passport';
+import { JwtModule } from '@nestjs/jwt';
+import { JwtStrategy } from './middlewares/auth/auth.middleware';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
-      isGlobal: true, // This makes ConfigModule global.
+      isGlobal: true,
     }),
-
-    MongooseModule.forRootAsync({
-      imports: [ConfigModule],
-      useFactory: async (configService: ConfigService) => {
-        const uri = configService.get<string>('MONGO_DB_URL');
-        console.log(`Connecting to MongoDB at: ${uri}`); // For debugging, remove in production
-        return { uri };
-      },
+    PassportModule.register({ defaultStrategy: 'jwt' }),
+    JwtModule.registerAsync({
       inject: [ConfigService],
+      useFactory: async (configService: ConfigService) => ({
+        secret: configService.get<string>('JWT_SECRET'),
+        signOptions: { expiresIn: '60m' },
+      }),
     }),
-    ChatModule, // Import ChatModule
-    UserModule, // Import UserModule
-    GroupModule, // Import GroupModule
-    MessageModule, // Import MessageModule
+    MongooseModule.forRootAsync({
+      inject: [ConfigService],
+      useFactory: async (configService: ConfigService) => ({
+        uri: configService.get<string>('MONGO_DB_URL'),
+      }),
+    }),
+    ChatModule,
+    UserModule,
+    GroupModule,
+    MessageModule,
+    AuthModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, JwtStrategy],
 })
-export class AppModule implements NestModule {
-  configure(consumer: MiddlewareConsumer) {
-    consumer
-      .apply(AuthMiddleware)
-      // .forRoutes({ path: '*', method: RequestMethod.ALL }); // Apply for all routes
-      // Alternatively, apply middleware to specific routes:
-      .forRoutes(AppController); // Apply only to AppController routes
-    // Or use strings for the controller path
-    // .forRoutes('app'); // Apply to routes starting with 'app'
-  }
-}
+export class AppModule {}

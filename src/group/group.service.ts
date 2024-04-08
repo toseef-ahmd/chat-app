@@ -13,7 +13,7 @@ export class GroupService {
     return newGroup.save();
   }
 
-  getGroup() {
+  async getGroup() {
     return this.groupModel.find();
   }
 

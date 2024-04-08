@@ -24,8 +24,12 @@ export class GroupController {
   }
 
   @Get()
-  getGroup() {
-    return this.GroupService.getGroup();
+  async getGroup() {
+    try {
+      return await this.GroupService.getGroup();
+    } catch (error) {
+      return error;
+    } 
   }
 
   @Get(':id')

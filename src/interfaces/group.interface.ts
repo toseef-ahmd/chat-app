@@ -1,8 +1,8 @@
 import { Document } from 'mongoose';
-import { User } from './user.interface';
+import { IUser } from './user.interface';
 
 export interface IGroup extends Document {
   name: string;
-  owner: User; 
-  members: User[];
+  owner: IUser;
+  members: Array<IUser>;
 }
