@@ -42,7 +42,7 @@ export class UserController {
     const users = await this.userService.findAll();
     return {
       status: HttpStatus.OK,
-      message: 'Users fetched successfull',
+      message: 'Users fetched successfully',
       data: users ,
     };
   }

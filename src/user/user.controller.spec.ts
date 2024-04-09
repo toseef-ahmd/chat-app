@@ -55,7 +55,7 @@ describe('UserController Functions Tests', () => {
     const dto = {
       email: 'test@gmail.com',
       password: 'password',
-      name: 'testuser',
+      username: 'testuser',
     };
     expect(await controller.create(dto)).toEqual({
       status: 201,
