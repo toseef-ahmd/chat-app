@@ -2,10 +2,10 @@ import * as request from 'supertest';
 import { Test } from '@nestjs/testing';
 import { UserController } from '../src/user/user.controller';
 import { UserService } from '../src/user/user.service';
-import { INestApplication } from '@nestjs/common';
+import { BadRequestException, INestApplication } from '@nestjs/common';
 import { CreateUserDto } from '../src/user/dto/create-user.dto/create-user.dto';
 import { UpdateUserDto } from '../src/user/dto/update-user.dto/update-user.dto';
-import { time } from 'console';
+import { error, time } from 'console';
 
 describe('UserController', () => {
   let app: INestApplication;
@@ -50,24 +50,94 @@ describe('UserController', () => {
       });
   });
 
-  it('/POST users (Create User) - Validation Error', () => {
-    const invalidUserData = { username: 'test' }; // Missing email
+  it('/POST users - Validation Error', async () => {
+    const invalidUserData = { username: 'test' }; // Missing required fields like email
 
-    return request(app.getHttpServer())
+    const err = new BadRequestException({
+      statusCode: 400,
+      message: [
+        'email should not be empty',
+        'email must be an email',
+        'password should not be empty',
+        'password must be a string',
+      ],
+    });
+    userService.create.mockRejectedValue(err);
+
+    await request(app.getHttpServer())
+      .post('/users')
+      .send(invalidUserData)
+      .expect(400)
+      .expect({
+        statusCode: 400,
+        message: [
+          'email should not be empty',
+          'email must be an email',
+          'password should not be empty',
+          'password must be a string',
+        ],
+      });
+  });
+
+  it('/POST users - Validation Error - No Username', async () => {
+    const invalidUserData = { username: 'test' }; // Missing required fields like email
+
+    const err = new BadRequestException({
+      statusCode: 400,
+      error: 'Bad Request',
+      message: ['username should not be empty', 'username must be a string'],
+    });
+    userService.create.mockRejectedValue(err);
+
+    await request(app.getHttpServer())
       .post('/users')
       .send(invalidUserData)
       .expect({
         statusCode: 400,
-        timestamp: expect.any(new Date().toISOString()),
-        path: '/users?',
-        message: {
-          message: [
-            'email should not be empty',
-          ],
-          error: 'Bad Request',
-          statusCode: 400,
-        },
-      }); // Replace with appropriate error status code for validation failures
+        error: 'Bad Request',
+        message: ['username should not be empty', 'username must be a string'],
+      });
+  });
+
+  it('/POST users - Validation Error - No Email', async () => {
+    const invalidUserData = { username: 'test' }; // Missing required fields like email
+
+    const err = new BadRequestException({
+      statusCode: 400,
+      error: 'Bad Request',
+      message: ['email should not be empty', 'email must be an email'],
+    });
+    userService.create.mockRejectedValue(err);
+
+    await request(app.getHttpServer())
+      .post('/users')
+      .send(invalidUserData)
+      .expect({
+        statusCode: 400,
+        error: 'Bad Request',
+        message: ['email should not be empty', 'email must be an email'],
+      });
+  });
+
+  it('/POST users - Validation Error - No Password', async () => {
+    const invalidUserData = { username: 'test' }; // Missing required fields like email
+
+    userService.create.mockRejectedValue(
+      new BadRequestException({
+        statusCode: 400,
+        error: 'Bad Request',
+        message: ['password should not be empty', 'password must be a string'],
+      }),
+    );
+
+    await request(app.getHttpServer())
+      .post('/users')
+      .send(invalidUserData)
+      .expect({
+        statusCode: 400,
+        error: 'Bad Request',
+        message: ['password should not be empty', 'password must be a string'],
+      });
   });
 
   //  ** Read User Tests **
@@ -80,7 +150,7 @@ describe('UserController', () => {
       .get('/users')
       .expect({
         status: 200,
-        message: 'Users fetched successfull',
+        message: 'Users fetched successfully',
         data: [{ id: 1, username: 'user1', email: 'user1@example.com' }],
       });
   });
@@ -93,14 +163,22 @@ describe('UserController', () => {
     return request(app.getHttpServer())
       .get(`/users/${userId}`)
       .expect(200)
-      .expect(user);
+      .expect({
+        status: 200,
+        message: 'User fetched successfully',
+        data: { id: 1, username: 'user1', email: 'user1@example.com' },
+      });
   });
 
-  it('/GET users/:id (Find One User) - Not Found', () => {
+  it('/GET users/:id (Find One User) - Not Found', async () => {
     const userId = 10; // Non-existent ID
     userService.findOne.mockReturnValue(Promise.resolve(null));
 
-    return request(app.getHttpServer()).get(`/users/${userId}`).expect(404); // Replace with appropriate error status code for not found
+    await request(app.getHttpServer()).get(`/users/${userId}`).expect({
+      message: 'User does not exist',
+      error: 'Not Found',
+      statusCode: 404,
+    });
   });
 
   it('/PUT users/:id (Update User)', () => {

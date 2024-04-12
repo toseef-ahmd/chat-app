@@ -38,28 +38,38 @@ export class UserController {
  
   @Get()
   // @UseGuards(AuthGuard('jwt'))
-  async findAll(): Promise<ApiResponse<Array<User>>> {
+  async findAll(): Promise<ApiResponse<Array<IUser>>> {
     const users = await this.userService.findAll();
+    if (!users) {
+      throw new NotFoundException('No users found');
+    }
+
     return {
       status: HttpStatus.OK,
       message: 'Users fetched successfully',
-      data: users ,
+      data: users as unknown as Array<IUser>,
     };
   }
 
-  @Get(':userID')
-  async findOne(@Param('userID') userID: string): Promise<ApiResponse<IUser>> {
-    const user = await this.userService.findOne(userID);
-    return {
-      status: HttpStatus.OK,
-      message: 'User fetched successfully',
-      data: user as unknown as IUser,
-    };
-  }
+  @Get(':id')
+    async getUserById(@Param('id') id: string) {
+        const user = await this.userService.findOne(id);
+        if (!user) {
+          throw new NotFoundException(`User does not exist`);
+        }
+        return {
+            status: 200,
+            message: 'User fetched successfully',
+            data: user
+        };
+    }
 
   @Put(':userID')
   async update(@Param('userID') userID: string, @Body() updateUserDto: UpdateUserDto): Promise<ApiResponse<IUser>> {
     const user = await this.userService.update(userID, updateUserDto);
+    if (!user) {
+      throw new NotFoundException(`User does not exist`);
+    }
     return {
       status: HttpStatus.OK,
       message: 'User updated successfully',
