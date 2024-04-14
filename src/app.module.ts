@@ -17,13 +17,14 @@ import { AuthModule } from './auth/auth.module';
     ConfigModule.forRoot({
       isGlobal: true,
     }),
-    
+
     MongooseModule.forRootAsync({
       inject: [ConfigService],
       useFactory: async (configService: ConfigService) => ({
         uri: configService.get<string>('MONGO_DB_URL'),
       }),
     }),
+
     AuthModule,
     ChatModule,
     UserModule,

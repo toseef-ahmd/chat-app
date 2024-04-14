@@ -9,7 +9,7 @@ import {
   Param,
   HttpStatus,
   NotFoundException,
-  UseGuards
+  HttpCode
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto/create-user.dto';
@@ -17,8 +17,7 @@ import { UpdateUserDto } from './dto/update-user.dto/update-user.dto';
 import { IUser } from 'src/interfaces/user.interface';
 import { ApiResponse } from 'src/interfaces/api-response.interface';
 import { DeleteResult } from 'mongodb';
-import { AuthGuard } from '@nestjs/passport';
-import { User } from './schemas/user.schema';
+
 
 @Controller('users')
 // @UseGuards(AuthGuard('jwt'))
@@ -26,10 +25,11 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Post()
+  @HttpCode(HttpStatus.CREATED)
   async create(@Body() createUserDto: CreateUserDto): Promise<ApiResponse<IUser>> {
     const user = await this.userService.create(createUserDto);
     return {
-      status: HttpStatus.CREATED,
+      statusCode: HttpStatus.CREATED,
       message: 'User created successfully',
       data: user as unknown as IUser,
     };
@@ -37,6 +37,7 @@ export class UserController {
 
  
   @Get()
+  @HttpCode(HttpStatus.OK)
   // @UseGuards(AuthGuard('jwt'))
   async findAll(): Promise<ApiResponse<Array<IUser>>> {
     const users = await this.userService.findAll();
@@ -45,47 +46,64 @@ export class UserController {
     }
 
     return {
-      status: HttpStatus.OK,
+      statusCode: HttpStatus.OK,
       message: 'Users fetched successfully',
       data: users as unknown as Array<IUser>,
     };
   }
 
   @Get(':id')
-    async getUserById(@Param('id') id: string) {
+    @HttpCode(HttpStatus.FOUND)
+    async findOne(@Param('id') id: string) {
         const user = await this.userService.findOne(id);
         if (!user) {
           throw new NotFoundException(`User does not exist`);
         }
         return {
-            status: 200,
+            statusCode: HttpStatus.FOUND,
             message: 'User fetched successfully',
             data: user
         };
     }
 
   @Put(':userID')
+  @HttpCode(HttpStatus.OK)
   async update(@Param('userID') userID: string, @Body() updateUserDto: UpdateUserDto): Promise<ApiResponse<IUser>> {
     const user = await this.userService.update(userID, updateUserDto);
     if (!user) {
       throw new NotFoundException(`User does not exist`);
     }
     return {
-      status: HttpStatus.OK,
+      statusCode: HttpStatus.OK,
       message: 'User updated successfully',
       data: user as unknown as IUser,
     } as ApiResponse<IUser>;
   }
 
   @Delete(':userID')
+  @HttpCode(HttpStatus.OK)
   async remove(@Param('userID') userID: string): Promise<ApiResponse<DeleteResult>> {
     const result = await this.userService.remove(userID);
     if(result.deletedCount === 0) {
       throw new NotFoundException(`User with ID ${userID} not found`);
     }
     return {
-      status: HttpStatus.OK,
+      statusCode: HttpStatus.OK,
       message: 'User deleted successfully',
+      data: null,
+    } as ApiResponse<DeleteResult>;
+  }
+
+  @Delete()
+  @HttpCode(HttpStatus.OK)
+  async removeAll(): Promise<ApiResponse<DeleteResult>> {
+    const result = await this.userService.removeAll();
+    if(result.deletedCount === 0) {
+      throw new NotFoundException(`No users found`);
+    }
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'All users deleted successfully',
       data: null,
     } as ApiResponse<DeleteResult>;
   }

@@ -12,6 +12,7 @@ export enum UserStatus {
 
 @Schema()
 export class User {
+  [x: string]: any;
   @Prop({ unique: true, required: true })
   username: string;
 
