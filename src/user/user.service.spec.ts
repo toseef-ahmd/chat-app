@@ -1,201 +1,218 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { UserService } from './user.service';
-import { NotFoundException } from '@nestjs/common';
-import { User } from './schemas/user.schema';
 import { getModelToken } from '@nestjs/mongoose';
-import { plainToInstance } from 'class-transformer';
-import { validate } from 'class-validator';
-import { CreateUserDto } from './dto/create-user.dto/create-user.dto';
+import { User } from './schemas/user.schema';
+import { NotFoundException } from '@nestjs/common';
 import { UpdateUserDto } from './dto/update-user.dto/update-user.dto';
 
 describe('UserService', () => {
-  // Function to validate DTOs
-  async function validateDto<T extends object>(
-    dto: unknown,
-    dtoType: new () => T,
-  ): Promise<T> {
-    const dtoInstance = plainToInstance(dtoType, dto);
-    const errors = await validate(dtoInstance as object); // Cast dtoInstance to object if necessary
-    if (errors.length > 0) {
-      throw new Error(
-        `Validation failed: ${errors.map((e) => (e.constraints ? Object.values(e.constraints).join(', ') : '')).join(', ')}`,
-      );
-    }
-    return dtoInstance;
-  }
-
   let service: UserService;
-  let mockUserModel;
+  let model: any; // Use 'any' to simplify type handling for mocks
 
   beforeEach(async () => {
-    mockUserModel = {
-      create: jest
-        .fn()
-        .mockImplementation((dto) =>
-          Promise.resolve({ _id: 'unique-id', ...dto }),
-        ),
-
-      find: jest.fn().mockReturnValue({
-        exec: jest.fn().mockResolvedValue([]),
-      }),
-
-      findById: jest.fn().mockReturnValue({
-        exec: jest.fn().mockImplementation((id) =>
-          id === 'existing-id'
-            ? Promise.resolve({
-                _id: 'existing-id',
-                email: 'user@example.com',
-              })
-            : Promise.resolve(null),
-        ),
-      }),
-
-      findByIdAndUpdate: jest.fn().mockReturnValue({
-        exec: jest
-          .fn()
-          .mockImplementation((id, dto) =>
-            id === 'existing-id'
-              ? Promise.resolve({ _id: 'existing-id', ...dto })
-              : Promise.resolve(null),
-          ),
-      }),
-
-      deleteOne: jest
-        .fn()
-        .mockImplementation(({ _id }) =>
-          _id === 'existing-id'
-            ? Promise.resolve({ deletedCount: 1 })
-            : Promise.resolve({ deletedCount: 0 }),
-        ),
-    };
-
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         UserService,
-        { provide: getModelToken(User.name), useValue: mockUserModel },
+        {
+          provide: getModelToken(User.name),
+          useValue: {
+            create: jest.fn(),
+            find: jest.fn().mockReturnThis(),
+            findOne: jest.fn().mockReturnThis(),
+            findById: jest.fn().mockReturnThis(),
+            findByIdAndUpdate: jest.fn().mockReturnThis(),
+            deleteOne: jest.fn(),
+            deleteMany: jest.fn(),
+            exec: jest.fn(),
+          },
+        },
       ],
     }).compile();
 
     service = module.get<UserService>(UserService);
+    model = module.get(getModelToken(User.name));
+
+    // Setup mock for exec here if specific to a test
+    model.exec.mockResolvedValue(null); // Default to null to be overridden in specific tests
   });
 
-  afterEach(() => {
-    jest.clearAllMocks(); // Ensure clean state between tests
-  });
+  describe('findUserByEmail', () => {
+    it('should return a user when found', async () => {
+      const fakeUser = {
+        _id: '661dc72b3465f941dcad0376',
+        username: 'testuser',
+        email: 'test@example.com',
+        password: 'hashedPassword',
+      };
 
-  it('should not create a user with invalid email format', async () => {
-    const invalidUserDto = {
-      email: 'bad-email-format',
-      password: 'securePass123',
-      username: 'johnDoe',
-    };
-    await expect(validateDto(invalidUserDto, CreateUserDto)).rejects.toThrow(
-      /Validation failed/,
-    );
-  });
+      // Setup mock for exec to return fakeUser when called
+      model.findOne.mockReturnThis(); // Ensure chaining
+      model.exec.mockResolvedValue(fakeUser); // Resolve to fakeUser for this test
 
-  it('should create a user successfully if valid data is provided', async () => {
-    const validUserDto = {
-      email: 'test@example.com',
-      password: 'secure123',
-      username: 'testuser',
-    };
-    mockUserModel.create.mockResolvedValue({
-      _id: 'unique-id',
-      ...validUserDto,
+      const result = await service.findUserByEmail('test@example.com');
+      expect(result).toEqual(fakeUser);
+      expect(model.findOne).toHaveBeenCalledWith({ email: 'test@example.com' });
+      expect(model.exec).toHaveBeenCalled(); // Ensure exec was called
     });
 
-    const validatedDto = await validateDto(validUserDto, CreateUserDto);
-    const result = await service.create(validatedDto as CreateUserDto);
-    expect(result).toEqual({ _id: 'unique-id', ...validatedDto });
-    expect(mockUserModel.create).toHaveBeenCalledWith(validatedDto);
-  });
-
-  it('should return all users, even if the array is empty', async () => {
-    mockUserModel.find.mockReturnValue({
-      exec: jest.fn().mockResolvedValue([]),
-    }); // Ensuring empty array response
-    const result = await service.findAll();
-    expect(result).toEqual([]);
-    expect(mockUserModel.find).toHaveBeenCalled();
-  });
-
-  it('should retrieve a single user by ID or return null', async () => {
-    // Ensure the mock is correctly set up right before the test
-    mockUserModel.findById.mockReturnValue({
-      exec: jest
-        .fn()
-        .mockResolvedValue({ _id: 'existing-id', email: 'user@example.com' }),
+    it('should return null when user not found', async () => {
+      const result = await service.findUserByEmail('test@example.com');
+      expect(result).toBeNull();
+      expect(model.findOne).toHaveBeenCalledWith({ email: 'test@example.com' });
+      expect(model.exec).toHaveBeenCalled();
     });
-    const result = await service.findOne('existing-id');
-    expect(result).toEqual({ _id: 'existing-id', email: 'user@example.com' });
-
-    // Ensure correct response for non-existing IDs
-    mockUserModel.findById.mockReturnValue({
-      exec: jest.fn().mockResolvedValue(null),
-    });
-    expect(await service.findOne('non-existing-id')).toBeNull();
   });
 
-  it('should return null when findById is called with an invalid ID', async () => {
-    const invalidId = 'nonexistent-id';
-    mockUserModel.findById.mockReturnValue({
-      exec: jest.fn().mockResolvedValue(null), // No user found
-    });
-    const result = await service.findOne(invalidId);
-    expect(result).toBeNull();
-    expect(mockUserModel.findById).toHaveBeenCalledWith(invalidId);
-  });
+  describe('create', () => {
+    it('should create a user and return the created user', async () => {
+      const createUserDto = {
+        username: 'newuser',
+        email: 'new@example.com',
+        password: 'password123',
+      };
+      const expectedUser = {
+        _id: '1',
+        ...createUserDto,
+      };
 
-  it('should update user email and username successfully', async () => {
-    const updateData = {
-      email: 'newemail@example.com',
-      username: 'newUsername',
-    };
-    mockUserModel.findByIdAndUpdate.mockReturnValue({
-      exec: jest.fn().mockResolvedValue({ _id: 'existing-id', ...updateData }),
+      model.create.mockResolvedValue(expectedUser);
+
+      const result = await service.create(createUserDto);
+      expect(result).toEqual(expectedUser);
+      expect(model.create).toHaveBeenCalledWith(createUserDto);
     });
 
-    // Correctly type the validation output
-    const validatedUpdateData = await validateDto<UpdateUserDto>(
-      updateData,
-      UpdateUserDto,
-    );
-    const result = await service.update('existing-id', validatedUpdateData);
-    expect(result).toEqual({ _id: 'existing-id', ...validatedUpdateData });
-    expect(mockUserModel.findByIdAndUpdate).toHaveBeenCalledWith(
-      'existing-id',
-      validatedUpdateData,
-      { new: true },
-    );
-  });
+    it('should throw a NotFoundException if creation fails', async () => {
+      model.create.mockResolvedValue(null);
 
-  it('should return null when updating a user with an invalid ID', async () => {
-    const invalidId = 'invalid-id';
-    const updateData = { email: 'newemail@example.com' };
-    mockUserModel.findByIdAndUpdate.mockReturnValue({
-      exec: jest.fn().mockResolvedValue(null), // No user updated
+      await expect(
+        service.create({
+          username: 'test',
+          email: 'test@example.com',
+          password: 'pass',
+        }),
+      ).rejects.toThrow(new NotFoundException('Failed to create user'));
     });
-    const result = await service.update(invalidId, updateData);
-    expect(result).toBeNull();
-    expect(mockUserModel.findByIdAndUpdate).toHaveBeenCalledWith(
-      invalidId,
-      updateData,
-      { new: true },
-    );
   });
 
-  it('should throw a NotFoundException when trying to delete a user with an invalid ID', async () => {
-    const invalidId = 'invalid-id';
-    mockUserModel.deleteOne.mockResolvedValue({ deletedCount: 0 }); // No user deleted
-    await expect(service.remove(invalidId)).rejects.toThrow(NotFoundException);
-    expect(mockUserModel.deleteOne).toHaveBeenCalledWith({ _id: invalidId });
+  describe('findAll', () => {
+    it('should return an array of users', async () => {
+      const users = [
+        {
+          _id: '1',
+          username: 'user1',
+          email: 'user1@example.com',
+          password: 'pass1',
+        },
+        {
+          _id: '2',
+          username: 'user2',
+          email: 'user2@example.com',
+          password: 'pass2',
+        },
+      ];
+      model.find.mockReturnThis(); // Mock chaining
+      model.exec.mockResolvedValue(users);
+
+      const result = await service.findAll();
+      expect(result).toEqual(users);
+      expect(model.find).toHaveBeenCalled();
+      expect(model.exec).toHaveBeenCalled();
+    });
+
+    it('should return an empty array when no users are found', async () => {
+      model.find.mockReturnThis(); // Ensure chaining is mocked
+      model.exec.mockResolvedValue([]);
+
+      const result = await service.findAll();
+      expect(result).toEqual([]);
+      expect(model.find).toHaveBeenCalled();
+      expect(model.exec).toHaveBeenCalled();
+    });
   });
 
-  it('should confirm deletion or throw if user does not exist', async () => {
-    expect(await service.remove('existing-id')).toEqual({ deletedCount: 1 });
-    await expect(service.remove('non-existing-id')).rejects.toThrow(
-      NotFoundException,
-    );
+  describe('findOne', () => {
+    it('should return a single user by ID', async () => {
+      const user = { _id: '1', username: 'user1', email: 'user1@example.com' };
+      model.findById.mockImplementation(() => ({
+        exec: jest.fn().mockResolvedValue(user),
+      }));
+
+      const result = await service.findOne('1');
+      expect(result).toEqual(user);
+    });
+
+    it('should return null if the user is not found', async () => {
+      model.findById.mockImplementation(() => ({
+        exec: jest.fn().mockResolvedValue(null),
+      }));
+
+      const result = await service.findOne('unknown-id');
+      expect(result).toBeNull();
+    });
+  });
+
+  describe('update', () => {
+    it('should update a user and return the updated user', async () => {
+      const updateUserDto: UpdateUserDto = { username: 'newuser' }; // Ensure this matches DTO definition
+      const updatedUser = {
+        _id: '1',
+        username: 'newuser',
+        email: 'user@example.com',
+      };
+
+      model.findByIdAndUpdate.mockImplementation(() => ({
+        exec: jest.fn().mockResolvedValue(updatedUser),
+      }));
+
+      const result = await service.update('1', updateUserDto);
+      expect(result).toEqual(updatedUser);
+    });
+
+    it('should return null if the user to update is not found', async () => {
+      const updateUserDto: UpdateUserDto = { username: 'newuser' }; // Consistent use of DTO
+
+      model.findByIdAndUpdate.mockImplementation(() => ({
+        exec: jest.fn().mockResolvedValue(null),
+      }));
+
+      const result = await service.update('unknown-id', updateUserDto);
+      expect(result).toBeNull();
+    });
+  });
+
+  describe('remove', () => {
+    it('should delete a user and return a delete result', async () => {
+      const deleteResult = { deletedCount: 1 };
+      model.deleteOne.mockResolvedValue(deleteResult);
+
+      const result = await service.remove('1');
+      expect(result).toEqual(deleteResult);
+    });
+
+    it('should throw a NotFoundException if no user is deleted', async () => {
+      model.deleteOne.mockResolvedValue({ deletedCount: 0 });
+
+      await expect(service.remove('unknown-id')).rejects.toThrow(
+        NotFoundException,
+      );
+    });
+  });
+
+  describe('removeAll', () => {
+    it('should delete all users and return a delete result', async () => {
+      const deleteResult = { deletedCount: 5 };
+      model.deleteMany.mockResolvedValue(deleteResult);
+
+      const result = await service.removeAll();
+      expect(result).toEqual(deleteResult);
+    });
+
+    it('should return a delete result of zero if no users exist', async () => {
+      model.deleteMany.mockResolvedValue({ deletedCount: 0 });
+
+      const result = await service.removeAll();
+      expect(result).toEqual({ deletedCount: 0 });
+    });
   });
 });

@@ -27,6 +27,10 @@ export class UpdateUserDto {
   readonly lastName?: string;
 
   @IsOptional()
+  @IsString()
+  readonly username?: string;
+
+  @IsOptional()
   @IsUrl()
   profilePicture?: string;
 
