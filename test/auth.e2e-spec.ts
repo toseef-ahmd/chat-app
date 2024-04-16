@@ -74,7 +74,7 @@ describe('AuthController (e2e)', () => {
         });
     });
 
-    it('should return a 400 error on invalid password', async () => {
+    it('should return a 400 error on wrong password', async () => {
       mockAuthService.login.mockRejectedValueOnce(
         new UnauthorizedException({
           statusCode: HttpStatus.UNAUTHORIZED,
@@ -94,7 +94,7 @@ describe('AuthController (e2e)', () => {
         });
     });
 
-    it('should return a 400 error on invalid email', async () => {
+    it('should return a 400 error on wrong email', async () => {
       mockAuthService.login.mockRejectedValueOnce(
         new UnauthorizedException({
           statusCode: HttpStatus.UNAUTHORIZED,
@@ -111,6 +111,18 @@ describe('AuthController (e2e)', () => {
           expect(body.statusCode).toBe(HttpStatus.UNAUTHORIZED);
           expect(body.error).toEqual('Unauthorized');
           expect(body.message).toEqual(['Invalid Email']);
+        });
+    });
+
+    it('should return a 400 error on invalid email', async () => {
+      // mockAuthService.signup.mockRejectedValueOnce(new Error('Invalid email'));
+
+      await request(app.getHttpServer())
+        .post('/auth/signup')
+        .send({ email: 'abc123', username: 'avb', password: '1234' })
+        .expect(HttpStatus.BAD_REQUEST)
+        .expect(({ body }) => {
+          expect(body.message).toEqual(['email must be an email']);
         });
     });
   });
@@ -146,6 +158,18 @@ describe('AuthController (e2e)', () => {
             'email should not be empty',
             'email must be an email',
           ]);
+        });
+    });
+
+    it('should return a 400 error on invalid email', async () => {
+      // mockAuthService.signup.mockRejectedValueOnce(new Error('Invalid email'));
+
+      await request(app.getHttpServer())
+        .post('/auth/signup')
+        .send({ email: 'abc123', username: 'avb', password: '1234' })
+        .expect(HttpStatus.BAD_REQUEST)
+        .expect(({ body }) => {
+          expect(body.message).toEqual(['email must be an email']);
         });
     });
 

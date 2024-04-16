@@ -5,8 +5,6 @@ import { User, UserDocument } from './schemas/user.schema';
 import { DeleteResult } from 'mongodb';
 import { UpdateUserDto } from './dto/update-user.dto/update-user.dto';
 import { CreateUserDto } from './dto/create-user.dto/create-user.dto';
-import { JwtService } from '@nestjs/jwt';
-import { validate } from 'class-validator';
 
 @Injectable()
 export class UserService {
@@ -14,13 +12,12 @@ export class UserService {
 
   async findUserByEmail(email: string): Promise<User | null> {
     const user = await this.userModel.findOne({ email }).exec();
-    
+
     return user || null;
   }
   async create(createUserDto: CreateUserDto): Promise<User> {
     const createdUser = await this.userModel.create(createUserDto);
 
-    console.log(createdUser);
     if (!createdUser) {
       throw new NotFoundException('Failed to create user');
     }

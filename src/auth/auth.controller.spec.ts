@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { HttpStatus } from '@nestjs/common';
+import { HttpStatus, UnauthorizedException } from '@nestjs/common';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { CreateUserDto } from '../user/dto/create-user.dto/create-user.dto';
@@ -50,31 +50,49 @@ describe('AuthController', () => {
     });
 
     it('should return a 401 error on invalid login', async () => {
-      mockAuthService.login.mockRejectedValueOnce(new Error('Invalid credentials'));
+      mockAuthService.login.mockRejectedValueOnce(
+        new Error('Invalid credentials'),
+      );
 
-      const dto : LoginDto ={
-        email: 'abc@gmail.com'
+      const dto = {
+        email: 'abc@gmail.com',
+        password: 'password',
       };
 
-      const result = await controller.login(dto);
+      await expect(controller.login(dto)).rejects.toThrow(
+        new UnauthorizedException(`Invalid credentials`),
+      );
+    });
 
-  });
+    it('should return a 400 error on invalid email', async () => {
+      mockAuthService.login.mockRejectedValueOnce(new Error('Invalid Email'));
 
-  describe('signup', () => {
-    it('should return a token and success message on signup', async () => {
-      const dto: CreateUserDto = {
-        username: 'newuser',
-        email: 'new@example.com',
-        password: 'newpass123',
+      const dto = {
+        email: 'ac',
+        password: 'password',
       };
 
-      const result = await controller.signup(dto);
-      expect(mockAuthService.signup).toHaveBeenCalledWith(dto);
+      await expect(controller.login(dto)).rejects.toThrow(
+        new UnauthorizedException(`Invalid Email`),
+      );
+    });
 
-      expect(result).toEqual({
-        statusCode: HttpStatus.CREATED,
-        message: 'User created successfully',
-        data: 'mocked-signup-token',
+    describe('signup', () => {
+      it('should return a token and success message on signup', async () => {
+        const dto: CreateUserDto = {
+          username: 'newuser',
+          email: 'new@example.com',
+          password: 'newpass123',
+        };
+
+        const result = await controller.signup(dto);
+        expect(mockAuthService.signup).toHaveBeenCalledWith(dto);
+
+        expect(result).toEqual({
+          statusCode: HttpStatus.CREATED,
+          message: 'User created successfully',
+          data: 'mocked-signup-token',
+        });
       });
     });
   });

@@ -18,7 +18,7 @@ export class AuthService {
 
   // This method is used to sign up a user
   async signup(signup: CreateUserDto): Promise<string> {
-    const hash: string = await this.hashPassword(signup.password);
+    const hash: string = await bcrypt.hashSync(signup.password, 10);
 
     signup.password = hash;
     const user = await this.userService.create(signup);
@@ -41,20 +41,15 @@ export class AuthService {
       throw new UnauthorizedException('Invalid Email');
     }
 
-    const hash = await this.hashPassword(loginDto.password);
+    const compare = await bcrypt.compare(loginDto.password, user.password);
 
-    if (user.password !== hash) {
-      throw new UnauthorizedException('Invalid password');
+    if (!compare) {
+      throw new UnauthorizedException('Invalid Password');
     }
 
     const payload = { username: user.username, sub: user._id };
 
     const access_token = await this.jwtService.signAsync(payload);
     return access_token;
-  }
-
-  private async hashPassword(password: string): Promise<string> {
-    const saltRounds = 10;
-    return bcrypt.hash(password, saltRounds);
   }
 }

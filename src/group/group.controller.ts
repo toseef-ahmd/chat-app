@@ -1,41 +1,114 @@
-import { createGroupDto } from './dto/CreateGroup.dto';
-import { getGroupDto } from './dto/GetGroup.dto';
-import { GroupService } from './group.service';
 import {
   Body,
   Controller,
+  Delete,
   Get,
-  HttpException,
+  HttpCode,
+  HttpStatus,
+  NotFoundException,
   Param,
   Post,
-  UsePipes,
-  ValidationPipe,
+  Put,
 } from '@nestjs/common';
+import { GroupService } from './group.service';
+import { CreateGroupDto } from './dto/create-group/create-group';
+import { UpdateGroupDto } from './dto/update-group/update-group'; // Make sure to create this DTO
+import { ApiResponse } from '../interfaces/api-response.interface';
+import { DeleteResult } from 'mongodb'; // Assuming MongoDB is used
 
-@Controller('group') // api
+@Controller('group')
 export class GroupController {
-  constructor(private GroupService: GroupService) {}
+  constructor(private readonly groupService: GroupService) {}
 
   @Post()
-  @UsePipes(new ValidationPipe())
-  createGroup(@Body() createGroupDto: createGroupDto) {
-    console.log(createGroupDto);
-    return this.GroupService.createGroup(createGroupDto);
+  @HttpCode(HttpStatus.CREATED)
+  async createGroup(
+    @Body() createGroupDto: CreateGroupDto,
+  ): Promise<ApiResponse<any>> {
+    const group = await this.groupService.create(createGroupDto);
+    return {
+      statusCode: HttpStatus.CREATED,
+      message: 'Group created successfully',
+      data: group,
+    };
   }
 
   @Get()
-  async getGroup() {
+  @HttpCode(HttpStatus.OK)
+  async getGroup(): Promise<ApiResponse<any[]>> {
     try {
-      return await this.GroupService.getGroup();
+      const groups = await this.groupService.findAll();
+      if (!groups || groups.length === 0) {
+        throw new NotFoundException('No groups found');
+      }
+      return {
+        statusCode: HttpStatus.OK,
+        message: 'Groups fetched successfully',
+        data: groups,
+      };
     } catch (error) {
-      return error;
-    } 
+      throw new NotFoundException('No groups found');
+    }
   }
 
   @Get(':id')
-  async getGroupById(@Param('id') id: string) {
-    const findGroup = await this.GroupService.getGroupById(id);
-    if (!findGroup) throw new HttpException('Group not found', 404);
-    return findGroup;
+  @HttpCode(HttpStatus.FOUND)
+  async getGroupById(@Param('id') id: string): Promise<ApiResponse<any>> {
+    const group = await this.groupService.findById(id);
+    if (!group) {
+      throw new NotFoundException('Group not found');
+    }
+    return {
+      statusCode: HttpStatus.FOUND,
+      message: 'Group fetched successfully',
+      data: group,
+    };
+  }
+
+  @Put(':id')
+  @HttpCode(HttpStatus.OK)
+  async updateGroup(
+    @Param('id') id: string,
+    @Body() updateGroupDto: UpdateGroupDto,
+  ): Promise<ApiResponse<any>> {
+    const updatedGroup = await this.groupService.update(id, updateGroupDto);
+    if (!updatedGroup) {
+      throw new NotFoundException(`Group with ID ${id} not found`);
+    }
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'Group updated successfully',
+      data: updatedGroup,
+    };
+  }
+
+  @Delete(':id')
+  @HttpCode(HttpStatus.OK)
+  async deleteGroup(
+    @Param('id') id: string,
+  ): Promise<ApiResponse<DeleteResult>> {
+    const result = await this.groupService.remove(id);
+    if (result.deletedCount === 0) {
+      throw new NotFoundException(`Group with ID ${id} not found`);
+    }
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'Group deleted successfully',
+      data: null,
+    };
+  }
+
+  @Delete()
+  @HttpCode(HttpStatus.OK)
+  async deleteAllGroups(): Promise<ApiResponse<DeleteResult>> {
+    const result = await this.groupService.removeAll();
+    if (result.deletedCount === 0) {
+      throw new NotFoundException('No groups found to delete');
+    }
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'All groups deleted successfully',
+      data: null,
+    };
   }
 }
