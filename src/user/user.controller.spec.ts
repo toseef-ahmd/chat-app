@@ -22,10 +22,13 @@ describe('UserController Functions Tests', () => {
         throw new NotFoundException(`User with ID ${id} not found`);
       }
     }),
-    update: jest.fn((id, dto) => ({
-      _id: id,
-      ...dto,
-    })),
+    update: jest.fn((id, dto) => {
+      if (id === 'existing-id') {
+        return { _id: id, ...dto };
+      } else {
+        throw new NotFoundException(`Group with ID ${id} not found`);
+      }
+    }),
     remove: jest.fn((id) => {
       if (id === 'existing-id') {
         return { deletedCount: 1 };
@@ -119,7 +122,7 @@ describe('UserController Functions Tests', () => {
   describe('User - Update', () => {
     it('should update a user', async () => {
       const dto = { email: 'updated@example.com' };
-      const userID = 'unique-id';
+      const userID = 'existing-id';
       expect(await controller.update(userID, dto)).toEqual({
         statusCode: HttpStatus.OK,
         message: 'User updated successfully',
@@ -141,7 +144,7 @@ describe('UserController Functions Tests', () => {
       const userID = 'existing-id';
 
       const result = await controller.remove(userID);
-      
+
       expect(result).toEqual({
         statusCode: HttpStatus.OK,
         message: 'User deleted successfully',

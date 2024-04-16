@@ -26,7 +26,6 @@ export class GroupService {
 
   async findAll(): Promise<Array<Group>> {
     const res = await this.groupModel.find().exec();
-    console.log(res);
     return res; // No longer throw if no groups, return empty array
   }
 
@@ -46,12 +45,10 @@ export class GroupService {
   }
 
   async remove(groupId: string): Promise<DeleteResult> {
-    const result = await this.groupModel
-      .deleteOne({ _id: new ObjectId(groupId) })
-      .exec();
-    // if (result.deletedCount === 0) {
-    //   throw new NotFoundException(`Group with ID ${groupId} not found`);
-    // }
+    const result = await this.groupModel.deleteOne({ _id: groupId });
+    if (result.deletedCount === 0) {
+      throw new NotFoundException(`Group with ID ${groupId} not found`);
+    }
     return result;
   }
 
