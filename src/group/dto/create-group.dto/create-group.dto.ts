@@ -1,4 +1,5 @@
 import {
+  IsArray,
   IsDateString,
   IsNotEmpty,
   IsOptional,
@@ -6,21 +7,12 @@ import {
 } from 'class-validator';
 import { User } from '../../../user/schemas/user.schema';
 
-export class UpdateGroupDto {
+export class CreateGroupDto {
   @IsNotEmpty()
   @IsString()
-  groupName?: string;
-
-  @IsNotEmpty()
-  members?: User[];
-
-  @IsNotEmpty()
-  createdBy?: User;
-
-  @IsDateString()
-  createdAt?: Date;
+  name: string;
 
   @IsString()
   @IsOptional()
-  groupDescription?: string;
+  description: string;
 }

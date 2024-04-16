@@ -11,10 +11,11 @@ import {
   Put,
 } from '@nestjs/common';
 import { GroupService } from './group.service';
-import { CreateGroupDto } from './dto/create-group/create-group';
-import { UpdateGroupDto } from './dto/update-group/update-group'; // Make sure to create this DTO
+import { CreateGroupDto } from './dto/create-group.dto/create-group.dto';
+import { UpdateGroupDto } from './dto/update-group.dto/update-group.dto'; // Make sure to create this DTO
 import { ApiResponse } from '../interfaces/api-response.interface';
 import { DeleteResult } from 'mongodb'; // Assuming MongoDB is used
+import { IGroup } from 'src/interfaces/group.interface';
 
 @Controller('group')
 export class GroupController {
@@ -24,12 +25,12 @@ export class GroupController {
   @HttpCode(HttpStatus.CREATED)
   async createGroup(
     @Body() createGroupDto: CreateGroupDto,
-  ): Promise<ApiResponse<any>> {
+  ): Promise<ApiResponse<IGroup>> {
     const group = await this.groupService.create(createGroupDto);
     return {
       statusCode: HttpStatus.CREATED,
       message: 'Group created successfully',
-      data: group,
+      data: group as unknown as IGroup,
     };
   }
 
@@ -54,7 +55,7 @@ export class GroupController {
   @Get(':id')
   @HttpCode(HttpStatus.FOUND)
   async getGroupById(@Param('id') id: string): Promise<ApiResponse<any>> {
-    const group = await this.groupService.findById(id);
+    const group = await this.groupService.findOne(id);
     if (!group) {
       throw new NotFoundException('Group not found');
     }

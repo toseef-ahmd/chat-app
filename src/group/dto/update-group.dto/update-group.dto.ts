@@ -6,21 +6,22 @@ import {
 } from 'class-validator';
 import { User } from '../../../user/schemas/user.schema';
 
-export class CreateGroupDto {
-  @IsNotEmpty()
+export class UpdateGroupDto {
+  @IsOptional()
   @IsString()
-  groupName: string;
+  name?: string;
 
-  @IsNotEmpty()
-  members: User[];
+  @IsOptional()
+  members?: Array<User>;
 
-  @IsNotEmpty()
-  createdBy: User;
+  @IsOptional()
+  createdBy?: User;
 
   @IsDateString()
-  createdAt: Date;
+  @IsOptional()
+  createdAt?: Date;
 
   @IsString()
   @IsOptional()
-  groupDescription?: string;
+  description?: string;
 }

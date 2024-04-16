@@ -13,12 +13,12 @@ export enum GroupStatus {
 @Schema()
 export class Group {
   @Prop({ required: true, unique: true }) // Assuming groupName should be unique
-  groupName: string;
+  name: string;
 
   @Prop({ type: Array<{ type: Types.ObjectId, ref: 'User' }>, default: [] })
   members: Array<Types.ObjectId> | Array<User>;
 
-  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true })
+  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'User' })
   createdBy: Types.ObjectId | User;
 
   @Prop({ default: Date.now })
@@ -28,7 +28,7 @@ export class Group {
   status: GroupStatus;
 
   @Prop()
-  groupDescription?: string;
+  description?: string;
 }
 
 export const GroupSchema = SchemaFactory.createForClass(Group);

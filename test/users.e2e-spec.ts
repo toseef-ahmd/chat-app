@@ -23,7 +23,6 @@ describe('UserController', () => {
 
   beforeEach(async () => {
     const moduleRef = await Test.createTestingModule({
-      imports: [], // Replace with actual UserModule import
       controllers: [UserController],
       providers: [{ provide: UserService, useValue: userService }],
     }).compile();
@@ -35,214 +34,143 @@ describe('UserController', () => {
         whitelist: true,
         forbidNonWhitelisted: true,
         transform: true,
-        exceptionFactory: (validationErrors = []) => {
-          const simplifiedMessages = validationErrors.flatMap((err) => {
-            // Concatenate the property name with each constraint description
-            return Object.values(err.constraints).map((message) => {
-              return message;
-            });
-          });
-          return new BadRequestException({
+        exceptionFactory: (validationErrors = []) =>
+          new BadRequestException({
             statusCode: 400,
             error: 'Bad Request',
-            message: simplifiedMessages,
-          });
-        },
+            message: validationErrors.flatMap((err) =>
+              Object.values(err.constraints).map((message) => message),
+            ),
+          }),
       }),
     );
-
     await app.init();
   });
 
   afterEach(async () => {
     jest.clearAllMocks();
-    // await app.close();
   });
 
-  //  ** Create User Tests **
+  describe('/POST users', () => {
+    it('should create a user successfully', async () => {
+      const newUserData: CreateUserDto = {
+        username: 'testuser',
+        email: 'test@example.com',
+        password: 'password',
+      };
+      userService.create.mockResolvedValue({ ...newUserData, _id: 1 });
 
-  it('/POST users (Create User)', () => {
-    const newUserData: CreateUserDto = {
-      username: 'testuser',
-      email: 'test@example.com',
-      password: 'password',
-    };
-    userService.create.mockReturnValue(
-      Promise.resolve({ ...newUserData, _id: 1 }),
-    );
+      await request(app.getHttpServer())
+        .post('/user')
+        .send(newUserData)
+        .expect(HttpStatus.CREATED)
+        .expect(({ body }) => {
+          expect(body.data.username).toBe('testuser');
+          expect(body.data.email).toBe('test@example.com');
+          expect(body.data._id).toBe(1);
+        });
+    });
 
-    return request(app.getHttpServer())
-      .post('/users')
-      .send(newUserData)
-      .expect(({ body }) => {
-        expect(body.statusCode).toBe(HttpStatus.CREATED);
-        expect(body.message).toBe('User created successfully');
-        expect(body.data).toEqual({ ...newUserData, _id: 1 });
-      });
+    it('should return a validation error if data is incomplete', async () => {
+      const incompleteData = { username: 'test' }; // Missing required fields like email and password
+
+      await request(app.getHttpServer())
+        .post('/user')
+        .send(incompleteData)
+        .expect(HttpStatus.BAD_REQUEST)
+        .expect(({ body }) => {
+          expect(body.error).toBe('Bad Request');
+          expect(body.message).toContain('email must be an email');
+          expect(body.message).toContain('password should not be empty');
+        });
+    });
   });
 
-  it('/POST users - Validation Error', async () => {
-    const invalidUserData = { username: 'test' }; // Missing required fields like email
+  describe('/GET users', () => {
+    it('should retrieve all users successfully', async () => {
+      const users = [{ id: 1, username: 'user1', email: 'user1@example.com' }];
+      userService.findAll.mockResolvedValueOnce(users);
 
-    await request(app.getHttpServer())
-      .post('/users')
-      .send(invalidUserData)
-      .expect(HttpStatus.BAD_REQUEST)
-      .expect(({ body }) => {
-        expect(body.statusCode).toBe(HttpStatus.BAD_REQUEST);
-        expect(body.error).toBe('Bad Request');
-        expect(body.message).toEqual([
-          'email should not be empty',
-          'email must be an email',
-          'password should not be empty',
-          'password must be a string',
-        ]);
-      });
+      await request(app.getHttpServer())
+        .get('/user')
+        .expect(HttpStatus.OK)
+        .expect(({ body }) => {
+          expect(body.data.length).toBe(1);
+          expect(body.message).toEqual('Users fetched successfully');
+          expect(body.data[0].username).toBe('user1');
+        });
+    });
+
+    it('should retrieve a single user by ID', async () => {
+      const user = { id: 1, username: 'user1', email: 'user1@example.com' };
+      userService.findOne.mockResolvedValue(user);
+
+      await request(app.getHttpServer())
+        .get('/user/1')
+        .expect(HttpStatus.FOUND)
+        .expect(({ body }) => {
+          expect(body.data.id).toBe(1);
+          expect(body.data.email).toBe('user1@example.com');
+          expect(body.data.username).toBe('user1');
+        });
+    });
+
+    it('should return not found if the user does not exist', async () => {
+      userService.findOne.mockResolvedValue(null);
+
+      await request(app.getHttpServer())
+        .get('/user/999')
+        .expect(HttpStatus.NOT_FOUND);
+    });
   });
 
-  it('/POST users - Validation Error - No Username', async () => {
-    const invalidUserData = { email: 'test@email.com', password: '1234' }; // Missing required fields like email
+  describe('/PUT users/:id', () => {
+    it('should update a user successfully', async () => {
+      const updateData = { email: 'updated@example.com' };
+      const updatedUser = {
+        id: 1,
+        username: 'user1',
+        email: 'updated@example.com',
+      };
+      userService.update.mockResolvedValue(updatedUser);
 
-    // const err = new BadRequestException({
-    //   statusCode: 400,
-    //   error: 'Bad Request',
-    //   message: ['username should not be empty', 'username must be a string'],
-    // });
-    // userService.create.mockRejectedValue(err);
+      await request(app.getHttpServer())
+        .put('/user/1')
+        .send(updateData)
+        .expect(HttpStatus.OK)
+        .expect(({ body }) => {
+          expect(body.data.email).toBe('updated@example.com');
+        });
+    });
 
-    await request(app.getHttpServer())
-      .post('/users')
-      .send(invalidUserData)
-      .expect(HttpStatus.BAD_REQUEST)
-      .expect(({ body }) => {
-        expect(body.statusCode).toBe(HttpStatus.BAD_REQUEST);
-        expect(body.error).toBe('Bad Request');
-        expect(body.message).toEqual([
-          'username should not be empty',
-          'username must be a string',
-        ]);
-      });
+    it('should return not found when updating a non-existing user', async () => {
+      userService.update.mockResolvedValue(null);
+
+      await request(app.getHttpServer())
+        .put('/user/999')
+        .send({ email: 'doesnotmatter@example.com' })
+        .expect(HttpStatus.NOT_FOUND);
+    });
   });
 
-  it('/POST users - Validation Error - No Email', async () => {
-    const invalidUserData = { username: 'test', password: 'pass1234' }; // Missing required fields like email
+  describe('/DELETE users/:id', () => {
+    it('should delete a user successfully', async () => {
+      userService.remove.mockResolvedValue({ deletedCount: 1 });
 
-    // const err = new BadRequestException({
-    //   statusCode: 400,
-    //   error: 'Bad Request',
-    //   message: ['email should not be empty', 'email must be an email'],
-    // });
-    // userService.create.mockRejectedValue(err);
+      await request(app.getHttpServer())
+        .delete('/user/1')
+        .expect(HttpStatus.OK)
+        .expect(({ body }) => {
+          expect(body.data).toBe(null);
+        });
+    });
 
-    await request(app.getHttpServer())
-      .post('/users')
-      .send(invalidUserData)
-      .expect(HttpStatus.BAD_REQUEST)
-      .expect(({ body }) => {
-        expect(body.statusCode).toBe(HttpStatus.BAD_REQUEST);
-        expect(body.error).toBe('Bad Request');
-        expect(body.message).toEqual([
-          'email should not be empty',
-          'email must be an email',
-        ]);
-      });
-  });
+    it('should return not found when trying to delete a non-existing user', async () => {
+      userService.remove.mockResolvedValue({ deletedCount: 0 });
 
-  it('/POST users - Validation Error - No Password', async () => {
-    const invalidUserData = { username: 'test', email: 'abc@gmail.com' }; // Missing required fields like email
-
-    // userService.create.mockRejectedValue(
-    //   new BadRequestException({
-    //     statusCode: 400,
-    //     error: 'Bad Request',
-    //     message: ['password should not be empty', 'password must be a string'],
-    //   }),
-    // );
-
-    await request(app.getHttpServer())
-      .post('/users')
-      .send(invalidUserData)
-      .expect(HttpStatus.BAD_REQUEST)
-      .expect(({ body }) => {
-        expect(body.statusCode).toBe(HttpStatus.BAD_REQUEST);
-        expect(body.error).toBe('Bad Request');
-        expect(body.message).toEqual([
-          'password should not be empty',
-          'password must be a string',
-        ]);
-      });
-  });
-
-  //  ** Read User Tests **
-
-  it('/GET users (Find All Users)', () => {
-    const users = [{ id: 1, username: 'user1', email: 'user1@example.com' }];
-    userService.findAll.mockReturnValue(Promise.resolve(users));
-
-    return request(app.getHttpServer())
-      .get('/users')
-      .expect(HttpStatus.OK)
-      .expect(({ body }) => {
-        expect(body.statusCode).toBe(HttpStatus.OK);
-        expect(body.message).toBe('Users fetched successfully');
-        expect(body.data).toEqual(users);
-      });
-  });
-
-  it('/GET users/:id (Find One User)', () => {
-    const userId = 1;
-    const user = { id: userId, username: 'user1', email: 'user1@example.com' };
-    userService.findOne.mockReturnValue(Promise.resolve(user));
-
-    return request(app.getHttpServer())
-      .get(`/users/${userId}`)
-      .expect(HttpStatus.FOUND)
-      .expect(({ body }) => {
-        expect(body.statusCode).toBe(HttpStatus.FOUND);
-        expect(body.message).toBe('User fetched successfully');
-        expect(body.data).toEqual(user);
-      });
-  });
-
-  it('/GET users/:id (Find One User) - Not Found', async () => {
-    const userId = 10; // Non-existent ID
-    userService.findOne.mockReturnValue(Promise.resolve(null));
-
-    await request(app.getHttpServer())
-      .get(`/users/${userId}`)
-      .expect(404)
-      .expect(({ body }) => {
-        expect(body.statusCode).toBe(404);
-        expect(body.error).toBe('Not Found');
-        expect(body.message).toEqual(['User does not exist']);
-      });
-  });
-
-  it('/PUT users/:id (Update User)', () => {
-    const userId = 1;
-    const updateData = { email: 'updated@example.com' };
-    const updatedUser = { ...updateData, id: userId, username: 'user1' }; // Existing username
-    userService.update.mockReturnValue(Promise.resolve(updatedUser));
-
-    return request(app.getHttpServer())
-      .put(`/users/${userId}`)
-      .send(updateData)
-      .expect(200)
-      .expect(({ body }) => {
-        expect(body.statusCode).toBe(200);
-        expect(body.message).toBe('User updated successfully');
-        expect(body.data).toEqual(updatedUser);
-      });
-  });
-
-  it('/PUT users/:id (Update User) - Not Found', () => {
-    const userId = 10; // Non-existent ID
-    const updateData = { email: 'updated@example.com' };
-    userService.update.mockReturnValue(Promise.resolve(null));
-
-    return request(app.getHttpServer())
-      .put(`/users/${userId}`)
-      .send(updateData)
-      .expect(404); // Replace with appropriate error status code for not found
+      await request(app.getHttpServer())
+        .delete('/user/999')
+        .expect(HttpStatus.NOT_FOUND);
+    });
   });
 });

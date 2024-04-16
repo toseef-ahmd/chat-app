@@ -1,10 +1,14 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { Group, GroupDocument } from './schemas/group.schema'; // Ensure you have GroupDocument if using TypeScript
-import { CreateGroupDto } from './dto/create-group/create-group';
-import { UpdateGroupDto } from './dto/update-group/update-group';
-import { DeleteResult } from 'mongodb';
+import { Group, GroupDocument } from './schemas/group.schema';
+import { CreateGroupDto } from './dto/create-group.dto/create-group.dto';
+import { UpdateGroupDto } from './dto/update-group.dto/update-group.dto';
+import { DeleteResult, ObjectId } from 'mongodb';
 
 @Injectable()
 export class GroupService {
@@ -15,18 +19,20 @@ export class GroupService {
   async create(createGroupDto: CreateGroupDto): Promise<Group> {
     const createdGroup = await this.groupModel.create(createGroupDto);
     if (!createdGroup) {
-      throw new NotFoundException('Failed to create group');
+      throw new BadRequestException('Failed to create group');
     }
     return createdGroup;
   }
 
-  async findAll(): Promise<Group[]> {
-    return this.groupModel.find().exec();
+  async findAll(): Promise<Array<Group>> {
+    const res = await this.groupModel.find().exec();
+    console.log(res);
+    return res; // No longer throw if no groups, return empty array
   }
 
-  async findById(groupId: string): Promise<Group | null> {
+  async findOne(groupId: string): Promise<Group | null> {
     const group = await this.groupModel.findById(groupId).exec();
-    return group || null;
+    return group || null; // Return null instead of throwing if not found
   }
 
   async update(
@@ -36,18 +42,20 @@ export class GroupService {
     const updatedGroup = await this.groupModel
       .findByIdAndUpdate(groupId, updateGroupDto, { new: true })
       .exec();
-    return updatedGroup || null;
+    return updatedGroup || null; // Return null instead of throwing if not found
   }
 
   async remove(groupId: string): Promise<DeleteResult> {
-    const result = await this.groupModel.deleteOne({ _id: groupId }).exec();
-    if (result.deletedCount === 0) {
-      throw new NotFoundException(`Group with ID ${groupId} not found`);
-    }
+    const result = await this.groupModel
+      .deleteOne({ _id: new ObjectId(groupId) })
+      .exec();
+    // if (result.deletedCount === 0) {
+    //   throw new NotFoundException(`Group with ID ${groupId} not found`);
+    // }
     return result;
   }
 
   async removeAll(): Promise<DeleteResult> {
-    return this.groupModel.deleteMany({});
+    return await this.groupModel.deleteMany({});
   }
 }

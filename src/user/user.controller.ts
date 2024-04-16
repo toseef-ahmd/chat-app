@@ -19,7 +19,7 @@ import { ApiResponse } from 'src/interfaces/api-response.interface';
 import { DeleteResult } from 'mongodb';
 
 
-@Controller('users')
+@Controller('user')
 // @UseGuards(AuthGuard('jwt'))
 export class UserController {
   constructor(private readonly userService: UserService) {}

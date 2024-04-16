@@ -94,7 +94,7 @@ describe('AuthController (e2e)', () => {
         });
     });
 
-    it('should return a 400 error on wrong email', async () => {
+    it('should return a 401 - Unauthorized error on wrong email', async () => {
       mockAuthService.login.mockRejectedValueOnce(
         new UnauthorizedException({
           statusCode: HttpStatus.UNAUTHORIZED,
