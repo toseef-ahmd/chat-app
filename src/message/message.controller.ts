@@ -14,9 +14,9 @@ import {
   import { MessageService } from './message.service';
   import { CreateMessageDto } from './dto/create-message.dto/create-message.dto';
   import { UpdateMessageDto } from './dto/update-message.dto/update-message.dto';
-  import { ApiResponse } from 'src/interfaces/api-response.interface';
+  import { ApiResponse } from '../interfaces/api-response.interface';
   import { DeleteResult } from 'mongodb';
-  import { IMessage } from 'src/interfaces/message.interface';
+  import { IMessage } from '../interfaces/message.interface';
   
   @Controller('messages')
   export class MessageController {
