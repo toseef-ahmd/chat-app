@@ -5,6 +5,7 @@ import { HttpStatus, NotFoundException } from '@nestjs/common';
 import { CreateChatDto } from './dto/create-chat.dto/create-chat.dto';
 import { ObjectId } from 'mongodb';
 import { ChatType } from './schemas/chat.schema';
+import { UpdateChatDto } from './dto/update-chat.dto/update-chat.dto';
 
 describe('ChatController Functions Tests', () => {
   let controller: ChatController;
@@ -64,42 +65,87 @@ describe('ChatController Functions Tests', () => {
     expect(controller).toBeDefined();
   });
 
-  describe('Chat - Create', () => {
-    it('should create a new chat', async () => {
+  describe('create', () => {
+    it('should successfully create a chat', async () => {
       const dto: CreateChatDto = {
         type: ChatType.Group,
         group: new ObjectId().toString(),
-        members: [new ObjectId(), new ObjectId()],
-        messages: [new ObjectId(), new ObjectId()],
+        members: [],
+        messages: [],
       };
-      expect(await controller.create(dto)).toEqual({
+      const responseValue = {
+        _id: 'unique-chat-id',
+        ...dto,
+      };
+      mockChatService.create.mockResolvedValue(responseValue);
+
+      const result = await controller.create(dto);
+
+      expect(mockChatService.create).toHaveBeenCalledWith(dto);
+      expect(result).toEqual({
         statusCode: HttpStatus.CREATED,
         message: 'Chat created successfully',
-        data: { _id: expect.any(String), ...dto },
+        data: responseValue,
       });
-      expect(mockChatService.create).toHaveBeenCalledWith(dto);
+    });
+
+    it('should throw a NotFoundException when chat creation fails', async () => {
+      const dto: CreateChatDto = {
+        type: ChatType.Group,
+        group: new ObjectId().toString(),
+        members: [],
+        messages: [],
+      };
+      mockChatService.create.mockResolvedValue(null);
+
+      await expect(controller.create(dto)).rejects.toThrow(NotFoundException);
+    });
+
+    it('should throw NotFoundException when service returns null', async () => {
+      const dto: CreateChatDto = {
+        type: ChatType.Group,
+        group: new ObjectId().toString(),
+        members: [],
+        messages: [],
+      };
+      mockChatService.create.mockResolvedValueOnce(null);
+      await expect(controller.create(dto)).rejects.toThrow(NotFoundException);
     });
   });
 
-  describe('Chat - FindAll', () => {
-    it('should fetch all chats', async () => {
-      expect(await controller.findAll()).toEqual({
+  describe('findAll', () => {
+    it('should return an array of chats', async () => {
+      const chatArray = [
+        {
+          _id: 'unique-chat-id1',
+          type: 'group',
+          group: new ObjectId().toString(),
+          members: [],
+          messages: [],
+        },
+        {
+          _id: 'unique-chat-id2',
+          type: 'direct',
+          members: [new ObjectId().toString()],
+          messages: [],
+        },
+      ];
+      mockChatService.findAll.mockResolvedValueOnce(chatArray as never);
+
+      const result = await controller.findAll();
+
+      expect(mockChatService.findAll).toHaveBeenCalled();
+      expect(result).toEqual({
         statusCode: HttpStatus.OK,
         message: 'Chats fetched successfully',
-        data: [
-          {
-            _id: 'unique-chat-id1',
-            type: 'group',
-            group: expect.any(ObjectId),
-          },
-          {
-            _id: 'unique-chat-id2',
-            type: 'direct',
-            members: expect.any(Array),
-          },
-        ],
+        data: chatArray,
       });
-      expect(mockChatService.findAll).toHaveBeenCalled();
+    });
+
+    it('should throw a NotFoundException when no chats are found', async () => {
+      mockChatService.findAll.mockResolvedValue([] as never);
+
+      await expect(controller.findAll()).rejects.toThrow(NotFoundException);
     });
   });
 
@@ -120,6 +166,14 @@ describe('ChatController Functions Tests', () => {
         new NotFoundException(`Chat with ID ${chatId} not found`),
       );
     });
+
+    it('should throw NotFoundException when chat to update is not found', async () => {
+      const chatId = new ObjectId().toString();
+      mockChatService.findOne.mockResolvedValueOnce(null as never);
+      await expect(controller.findOne(chatId)).rejects.toThrow(
+        NotFoundException,
+      );
+    });
   });
 
   describe('Chat - Update', () => {
@@ -138,6 +192,27 @@ describe('ChatController Functions Tests', () => {
       const chatId = 'non-existing-id';
       await expect(controller.update(chatId, {})).rejects.toThrow(
         new NotFoundException(`Chat with ID ${chatId} not found`),
+      );
+    });
+
+    it('should throw an exception when chat updating fails', async () => {
+      const chatId = 'non-existent-id';
+      const updateChatDto: UpdateChatDto = { type: ChatType.Direct };
+      mockChatService.update.mockRejectedValue(
+        new NotFoundException('Chat not found'),
+      );
+
+      await expect(controller.update(chatId, updateChatDto)).rejects.toThrow(
+        NotFoundException,
+      );
+    });
+
+    it('should throw NotFoundException when chat to update is not found', async () => {
+      const chatId = new ObjectId().toString();
+      const updateChatDto: UpdateChatDto = { type: ChatType.Direct };
+      mockChatService.update.mockResolvedValueOnce(null);
+      await expect(controller.update(chatId, updateChatDto)).rejects.toThrow(
+        NotFoundException,
       );
     });
   });
@@ -161,6 +236,27 @@ describe('ChatController Functions Tests', () => {
       await expect(controller.remove(chatId)).rejects.toThrow(
         new NotFoundException(`Chat with ID ${chatId} not found`),
       );
+    });
+
+    it('should throw NotFoundException when chat to remove is not found', async () => {
+      const chatId = new ObjectId().toString();
+      const updateChatDto: UpdateChatDto = { type: ChatType.Direct };
+      mockChatService.update.mockResolvedValueOnce(null);
+      await expect(controller.update(chatId, updateChatDto)).rejects.toThrow(
+        NotFoundException,
+      );
+    });
+
+    it('should throw a NotFoundException when no chat is deleted', async () => {
+      const chatId = new ObjectId().toString(); // or 'non-existing-id'
+      mockChatService.remove.mockResolvedValueOnce({
+        deletedCount: 0,
+      } as never);
+
+      await expect(controller.remove(chatId)).rejects.toThrow(
+        new NotFoundException(`Chat with ID ${chatId} not found`),
+      );
+      expect(mockChatService.remove).toHaveBeenCalledWith(chatId);
     });
   });
 
