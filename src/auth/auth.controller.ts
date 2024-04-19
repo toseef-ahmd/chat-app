@@ -3,7 +3,8 @@ import { AuthService } from './auth.service';
 import { CreateUserDto } from '../user/dto/create-user.dto/create-user.dto';
 import { sign } from 'crypto';
 import { ApiResponse } from '../interfaces/api-response.interface';
-import { LoginDto } from './dto/auth-login/auth-login';
+import { LoginDto } from './dto/auth-login.dto/auth-login.dto';
+import { SignupDTO } from './dto/auth-signup.dto/auth-signup.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -12,7 +13,7 @@ export class AuthController {
   @Post('login')
   @HttpCode(HttpStatus.OK)
   async login(@Body() loginDto: LoginDto): Promise<ApiResponse<string>> {
-    const access_token  = await this.authService.login(loginDto);
+    const access_token = await this.authService.login(loginDto);
     return {
       statusCode: HttpStatus.OK,
       message: 'User logged in successfully',
@@ -22,7 +23,7 @@ export class AuthController {
 
   @Post('signup')
   @HttpCode(HttpStatus.CREATED)
-  async signup(@Body() signup: CreateUserDto) : Promise<ApiResponse<string>> {
+  async signup(@Body() signup: SignupDTO): Promise<ApiResponse<string>> {
     const token = await this.authService.signup(signup);
     return {
       statusCode: HttpStatus.CREATED,

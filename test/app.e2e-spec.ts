@@ -23,10 +23,6 @@ describe('AppController (e2e)', () => {
   });
 
   afterEach(async () => {
-    await app.close();  // This ensures that the application is properly closed after each test
+    await app.close(); // This ensures that the application is properly closed after each test
   });
-
 });
-
-
-

@@ -49,7 +49,6 @@ describe('JwtStrategy', () => {
   //   const payload = { userId: 1, username: 'validUser' };
   //   const result = await jwtStrategy.validate(payload);
 
-
   //   expect(result).toEqual({ userId: 1, username: 'validUser' });
   //   expect(mockAuthService.validateUser).toHaveBeenCalledWith(payload);
   // });

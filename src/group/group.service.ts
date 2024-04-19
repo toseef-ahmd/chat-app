@@ -17,6 +17,7 @@ export class GroupService {
   ) {}
 
   async create(createGroupDto: CreateGroupDto): Promise<Group> {
+    console.log("GROUP SERVICE", createGroupDto);
     const createdGroup = await this.groupModel.create(createGroupDto);
     if (!createdGroup) {
       throw new BadRequestException('Failed to create group');
@@ -53,6 +54,7 @@ export class GroupService {
   }
 
   async removeAll(): Promise<DeleteResult> {
+    // await this.groupModel.dropSearchIndex('groupName_1');
     return await this.groupModel.deleteMany({});
   }
 }

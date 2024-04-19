@@ -3,13 +3,13 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
 
 
-export enum MessageType {
+export enum MessageStatus {
   Unread = 0,
   Read = 1,
 }
 @Schema()
 export class Message extends Document {
-  @Prop({ type: Types.ObjectId, ref: 'User', required: true })
+  @Prop({ type: Types.ObjectId, ref: 'User' })
   sender: Types.ObjectId;
 
   @Prop({ required: true })
@@ -20,12 +20,12 @@ export class Message extends Document {
 
   @Prop({
     type: Number,
-    enum: MessageType,
-    default: MessageType.Unread,
+    enum: MessageStatus,
+    default: MessageStatus.Unread,
   })
-  type: MessageType;
+  type: MessageStatus;
 
-  @Prop({ type: Types.ObjectId, ref: 'User', required: true })
+  @Prop({ type: Array<{ type: Types.ObjectId, ref: 'User' }>, default: [] })
   seenBy: Array<Types.ObjectId>;
 }
 

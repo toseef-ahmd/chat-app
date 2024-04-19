@@ -18,14 +18,17 @@ import { ApiResponse } from 'src/interfaces/api-response.interface';
 import { DeleteResult } from 'mongodb';
 import { IGroup } from 'src/interfaces/group.interface';
 
-@Controller('group')
+@Controller('groups')
 export class GroupController {
   constructor(private readonly groupService: GroupService) {}
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
   async create(@Body() createGroupDto: CreateGroupDto): Promise<ApiResponse<IGroup>> {
+    console.log("GROUP: ", createGroupDto);
     const group = await this.groupService.create(createGroupDto);
+
+    
     if (!group) {
       throw new NotFoundException('Failed to create group');
     }

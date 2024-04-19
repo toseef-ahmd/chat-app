@@ -55,6 +55,6 @@ export class ChatService {
     // if (result.deletedCount === 0) {
     //   throw new NotFoundException('No chats found to delete');
     // }
-    return result || null;
+    return result;
   }
 }

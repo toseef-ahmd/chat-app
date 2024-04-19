@@ -173,5 +173,21 @@ describe('ChatService', () => {
       const result = await service.removeAll();
       expect(result).toEqual(deleteResult);
     });
+
+    // it('should return null if not chats are found to delete', async () => {
+    //   model.deleteMany.mockImplementation(() => ({
+    //     exec: jest.fn().mockResolvedValue(null),
+    //   }));
+    //   const result = await service.removeAll();
+    //   expect(result).toBeNull();
+    // });
+
+    it('should handle the case where no chats are found to remove', async () => {
+      const deleteResult = { deletedCount: 0 };
+      model.deleteMany.mockResolvedValue(deleteResult);
+
+      const result = await service.removeAll();
+      expect(result).toEqual(deleteResult);
+    });
   });
 });
