@@ -9,8 +9,7 @@ import {
   Param,
   HttpStatus,
   NotFoundException,
-  HttpCode,
-  UseGuards
+  HttpCode
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto/create-user.dto';
@@ -18,7 +17,6 @@ import { UpdateUserDto } from './dto/update-user.dto/update-user.dto';
 import { IUser } from 'src/interfaces/user.interface';
 import { ApiResponse } from 'src/interfaces/api-response.interface';
 import { DeleteResult } from 'mongodb';
-import { AuthGuard } from '@nestjs/passport';
 
 
 @Controller('user')
@@ -68,7 +66,7 @@ export class UserController {
         };
     }
 
-  @Put(':id')
+  @Put(':userID')
   @HttpCode(HttpStatus.OK)
   async update(@Param('userID') userID: string, @Body() updateUserDto: UpdateUserDto): Promise<ApiResponse<IUser>> {
     const user = await this.userService.update(userID, updateUserDto);
@@ -82,7 +80,7 @@ export class UserController {
     } as ApiResponse<IUser>;
   }
 
-  @Delete(':id')
+  @Delete(':userID')
   @HttpCode(HttpStatus.OK)
   async remove(@Param('userID') userID: string): Promise<ApiResponse<DeleteResult>> {
     const result = await this.userService.remove(userID);
