@@ -17,7 +17,6 @@ export class GroupService {
   ) {}
 
   async create(createGroupDto: CreateGroupDto): Promise<Group> {
-    console.log("GROUP SERVICE", createGroupDto);
     const createdGroup = await this.groupModel.create(createGroupDto);
     if (!createdGroup) {
       throw new BadRequestException('Failed to create group');

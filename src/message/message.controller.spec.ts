@@ -149,21 +149,21 @@ describe('MessageController Functions Tests', () => {
     });
   });
 
-  describe('Message - RemoveAll', () => {
-    it('should delete all messages and return success', async () => {
-      expect(await controller.removeAll()).toEqual({
-        statusCode: HttpStatus.OK,
-        message: 'All messages deleted successfully',
-        data: null,
-      });
-      expect(mockMessageService.removeAll).toHaveBeenCalled();
-    });
+  // describe('Message - RemoveAll', () => {
+  //   it('should delete all messages and return success', async () => {
+  //     expect(await controller.removeAll()).toEqual({
+  //       statusCode: HttpStatus.OK,
+  //       message: 'All messages deleted successfully',
+  //       data: null,
+  //     });
+  //     expect(mockMessageService.removeAll).toHaveBeenCalled();
+  //   });
 
-    it('should throw a not found exception when there are no messages to delete', async () => {
-      mockMessageService.removeAll.mockReturnValueOnce({ deletedCount: 0 });
-      await expect(controller.removeAll()).rejects.toThrow(
-        new NotFoundException('No messages found to delete'),
-      );
-    });
-  });
+  //   it('should throw a not found exception when there are no messages to delete', async () => {
+  //     mockMessageService.removeAll.mockReturnValueOnce({ deletedCount: 0 });
+  //     await expect(controller.removeAll()).rejects.toThrow(
+  //       new NotFoundException('No messages found to delete'),
+  //     );
+  //   });
+  // });
 });

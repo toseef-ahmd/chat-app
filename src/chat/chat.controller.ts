@@ -96,18 +96,18 @@ import {
       };
     }
   
-    @Delete()
-    @HttpCode(HttpStatus.OK)
-    async removeAll(): Promise<ApiResponse<DeleteResult>> {
-      const result = await this.chatService.removeAll();
-      if (result.deletedCount === 0) {
-        throw new NotFoundException('No chats found to delete');
-      }
-      return {
-        statusCode: HttpStatus.OK,
-        message: 'All chats deleted successfully',
-        data: null,
-      };
-    }
+    // @Delete()
+    // @HttpCode(HttpStatus.OK)
+    // async removeAll(): Promise<ApiResponse<DeleteResult>> {
+    //   const result = await this.chatService.removeAll();
+    //   if (result.deletedCount === 0) {
+    //     throw new NotFoundException('No chats found to delete');
+    //   }
+    //   return {
+    //     statusCode: HttpStatus.OK,
+    //     message: 'All chats deleted successfully',
+    //     data: null,
+    //   };
+    // }
   }
   

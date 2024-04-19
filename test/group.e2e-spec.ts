@@ -64,7 +64,7 @@ describe('GroupController', () => {
       groupService.create.mockResolvedValueOnce({ ...newGroupData, _id: 1 });
 
       return await request(app.getHttpServer())
-        .post('/group')
+        .post('/groups')
         .send(newGroupData)
         .expect(HttpStatus.CREATED)
         .expect(({ body }) => {
@@ -87,7 +87,7 @@ describe('GroupController', () => {
       groupService.create.mockRejectedValue(serviceError);
 
       return await request(app.getHttpServer())
-        .post('/group')
+        .post('/groups')
         .send(newGroupData)
         .expect(HttpStatus.INTERNAL_SERVER_ERROR)
         .expect(({ body }) => {
@@ -103,7 +103,7 @@ describe('GroupController', () => {
       groupService.create.mockRejectedValue(serviceError);
 
       await request(app.getHttpServer())
-        .post('/group')
+        .post('/groups')
         .send(incompleteData)
         .expect(HttpStatus.BAD_REQUEST)
         .expect(({ body }) => {
@@ -120,7 +120,7 @@ describe('GroupController', () => {
       groupService.create.mockRejectedValue(serviceError);
 
       await request(app.getHttpServer())
-        .post('/group')
+        .post('/groups')
         .send(incompleteData)
         .expect(HttpStatus.BAD_REQUEST)
         .expect(({ body }) => {
@@ -140,7 +140,7 @@ describe('GroupController', () => {
       groupService.findAll.mockResolvedValue(groups);
 
       await request(app.getHttpServer())
-        .get('/group')
+        .get('/groups')
         .expect(HttpStatus.OK)
         .expect(({ body }) => {
           expect(body.data.length).toBe(2);
@@ -154,7 +154,7 @@ describe('GroupController', () => {
       groupService.findAll.mockRejectedValue(serviceError);
 
       await request(app.getHttpServer())
-        .get('/group')
+        .get('/groups')
         .expect(HttpStatus.NOT_FOUND)
         .expect(({ body }) => {
           expect(body.error).toBe('Not Found');
@@ -174,7 +174,7 @@ describe('GroupController', () => {
       groupService.findOne.mockResolvedValueOnce(group);
 
       await request(app.getHttpServer())
-        .get('/group/1')
+        .get('/groups/1')
         .expect(HttpStatus.FOUND)
         .expect(({ body }) => {
           expect(body.data._id).toEqual(1);
@@ -186,7 +186,7 @@ describe('GroupController', () => {
       groupService.findOne.mockResolvedValue(null);
 
       await request(app.getHttpServer())
-        .get('/group/999')
+        .get('/groups/999')
         .expect(HttpStatus.NOT_FOUND)
         .expect(({ body }) => {
           expect(body.error).toBe('Not Found');
@@ -204,7 +204,7 @@ describe('GroupController', () => {
       groupService.update.mockResolvedValueOnce({ _id: '1', ...updatedData });
 
       await request(app.getHttpServer())
-        .put('/group/1') // Correct the endpoint if necessary
+        .put('/groups/1') // Correct the endpoint if necessary
         .send(updatedData)
         .expect(HttpStatus.OK)
         .expect(({ body }) => {
@@ -229,7 +229,7 @@ describe('GroupController', () => {
       groupService.remove.mockResolvedValue({ deletedCount: 1 });
 
       await request(app.getHttpServer())
-        .delete('/group/1')
+        .delete('/groups/1')
         .expect(HttpStatus.OK)
         .expect(({ body }) => {
           expect(body.statusCode).toBe(HttpStatus.OK);
@@ -243,7 +243,7 @@ describe('GroupController', () => {
 
       const id = 999;
       await request(app.getHttpServer())
-        .delete(`/group/${id}`)
+        .delete(`/groups/${id}`)
         .expect(HttpStatus.NOT_FOUND)
         .expect(({ body }) => {
           expect(body.statusCode).toBe(HttpStatus.NOT_FOUND);

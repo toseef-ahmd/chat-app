@@ -25,7 +25,6 @@ export class GroupController {
   @Post()
   @HttpCode(HttpStatus.CREATED)
   async create(@Body() createGroupDto: CreateGroupDto): Promise<ApiResponse<IGroup>> {
-    console.log("GROUP: ", createGroupDto);
     const group = await this.groupService.create(createGroupDto);
 
     
@@ -95,17 +94,17 @@ export class GroupController {
     } as ApiResponse<DeleteResult>;
   }
 
-  @Delete()
-  @HttpCode(HttpStatus.OK)
-  async removeAll(): Promise<ApiResponse<DeleteResult>> {
-    const result = await this.groupService.removeAll();
-    if (result.deletedCount === 0) {
-      throw new NotFoundException('No groups found to delete');
-    }
-    return {
-      statusCode: HttpStatus.OK,
-      message: 'All groups deleted successfully',
-      data: null,
-    };
-  }
+  // @Delete()
+  // @HttpCode(HttpStatus.OK)
+  // async removeAll(): Promise<ApiResponse<DeleteResult>> {
+  //   const result = await this.groupService.removeAll();
+  //   if (result.deletedCount === 0) {
+  //     throw new NotFoundException('No groups found to delete');
+  //   }
+  //   return {
+  //     statusCode: HttpStatus.OK,
+  //     message: 'All groups deleted successfully',
+  //     data: null,
+  //   };
+  // }
 }

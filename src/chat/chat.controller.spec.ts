@@ -260,21 +260,21 @@ describe('ChatController Functions Tests', () => {
     });
   });
 
-  describe('Chat - RemoveAll', () => {
-    it('should delete all chats and return success', async () => {
-      expect(await controller.removeAll()).toEqual({
-        statusCode: HttpStatus.OK,
-        message: 'All chats deleted successfully',
-        data: null,
-      });
-      expect(mockChatService.removeAll).toHaveBeenCalled();
-    });
+  // describe('Chat - RemoveAll', () => {
+  //   it('should delete all chats and return success', async () => {
+  //     expect(await controller.removeAll()).toEqual({
+  //       statusCode: HttpStatus.OK,
+  //       message: 'All chats deleted successfully',
+  //       data: null,
+  //     });
+  //     expect(mockChatService.removeAll).toHaveBeenCalled();
+  //   });
 
-    it('should throw a not found exception when there are no chats to delete', async () => {
-      mockChatService.removeAll.mockReturnValueOnce({ deletedCount: 0 });
-      await expect(controller.removeAll()).rejects.toThrow(
-        new NotFoundException('No chats found to delete'),
-      );
-    });
-  });
+  //   it('should throw a not found exception when there are no chats to delete', async () => {
+  //     mockChatService.removeAll.mockReturnValueOnce({ deletedCount: 0 });
+  //     await expect(controller.removeAll()).rejects.toThrow(
+  //       new NotFoundException('No chats found to delete'),
+  //     );
+  //   });
+  // });
 });

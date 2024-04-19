@@ -148,21 +148,21 @@ describe('GroupController Functions Tests', () => {
     });
   });
 
-  describe('Group - RemoveAll', () => {
-    it('should delete all groups and return success', async () => {
-      expect(await controller.removeAll()).toEqual({
-        statusCode: HttpStatus.OK,
-        message: 'All groups deleted successfully',
-        data: null,
-      });
-      expect(mockGroupService.removeAll).toHaveBeenCalled();
-    });
+  // describe('Group - RemoveAll', () => {
+  //   it('should delete all groups and return success', async () => {
+  //     expect(await controller.removeAll()).toEqual({
+  //       statusCode: HttpStatus.OK,
+  //       message: 'All groups deleted successfully',
+  //       data: null,
+  //     });
+  //     expect(mockGroupService.removeAll).toHaveBeenCalled();
+  //   });
 
-    it('should throw a not found exception when there are no groups to delete', async () => {
-      mockGroupService.removeAll.mockReturnValueOnce({ deletedCount: 0 });
-      await expect(controller.removeAll()).rejects.toThrow(
-        new NotFoundException('No groups found to delete'),
-      );
-    });
-  });
+  //   it('should throw a not found exception when there are no groups to delete', async () => {
+  //     mockGroupService.removeAll.mockReturnValueOnce({ deletedCount: 0 });
+  //     await expect(controller.removeAll()).rejects.toThrow(
+  //       new NotFoundException('No groups found to delete'),
+  //     );
+  //   });
+  // });
 });

@@ -92,18 +92,18 @@ import {
       };
     }
   
-    @Delete()
-    @HttpCode(HttpStatus.OK)
-    async removeAll(): Promise<ApiResponse<DeleteResult>> {
-      const result = await this.messageService.removeAll();
-      if (result.deletedCount === 0) {
-        throw new NotFoundException('No messages found to delete');
-      }
-      return {
-        statusCode: HttpStatus.OK,
-        message: 'All messages deleted successfully',
-        data: null,
-      };
-    }
+    // @Delete()
+    // @HttpCode(HttpStatus.OK)
+    // async removeAll(): Promise<ApiResponse<DeleteResult>> {
+    //   const result = await this.messageService.removeAll();
+    //   if (result.deletedCount === 0) {
+    //     throw new NotFoundException('No messages found to delete');
+    //   }
+    //   return {
+    //     statusCode: HttpStatus.OK,
+    //     message: 'All messages deleted successfully',
+    //     data: null,
+    //   };
+    // }
   }
   

@@ -19,7 +19,7 @@ import { ApiResponse } from 'src/interfaces/api-response.interface';
 import { DeleteResult } from 'mongodb';
 
 
-@Controller('user')
+@Controller('users')
 // @UseGuards(AuthGuard('jwt'))
 export class UserController {
   constructor(private readonly userService: UserService) {}
@@ -66,12 +66,12 @@ export class UserController {
         };
     }
 
-  @Put(':userID')
+  @Put(':id')
   @HttpCode(HttpStatus.OK)
-  async update(@Param('userID') userID: string, @Body() updateUserDto: UpdateUserDto): Promise<ApiResponse<IUser>> {
-    const user = await this.userService.update(userID, updateUserDto);
+  async update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto): Promise<ApiResponse<IUser>> {
+    const user = await this.userService.update(id, updateUserDto);
     if (!user) {
-      throw new NotFoundException(`User does not exist`);
+      throw new NotFoundException(`User with ID ${id} not found`);
     }
     return {
       statusCode: HttpStatus.OK,
@@ -80,12 +80,12 @@ export class UserController {
     } as ApiResponse<IUser>;
   }
 
-  @Delete(':userID')
+  @Delete(':id')
   @HttpCode(HttpStatus.OK)
-  async remove(@Param('userID') userID: string): Promise<ApiResponse<DeleteResult>> {
-    const result = await this.userService.remove(userID);
+  async remove(@Param('id') id: string): Promise<ApiResponse<DeleteResult>> {
+    const result = await this.userService.remove(id);
     if(result.deletedCount === 0) {
-      throw new NotFoundException(`User with ID ${userID} not found`);
+      throw new NotFoundException(`User with ID ${id} not found`);
     }
     return {
       statusCode: HttpStatus.OK,
@@ -94,17 +94,17 @@ export class UserController {
     } as ApiResponse<DeleteResult>;
   }
 
-  @Delete()
-  @HttpCode(HttpStatus.OK)
-  async removeAll(): Promise<ApiResponse<DeleteResult>> {
-    const result = await this.userService.removeAll();
-    if(result.deletedCount === 0) {
-      throw new NotFoundException(`No users found`);
-    }
-    return {
-      statusCode: HttpStatus.OK,
-      message: 'All users deleted successfully',
-      data: null,
-    } as ApiResponse<DeleteResult>;
-  }
+  // @Delete()
+  // @HttpCode(HttpStatus.OK)
+  // async removeAll(): Promise<ApiResponse<DeleteResult>> {
+  //   const result = await this.userService.removeAll();
+  //   if(result.deletedCount === 0) {
+  //     throw new NotFoundException(`No users found`);
+  //   }
+  //   return {
+  //     statusCode: HttpStatus.OK,
+  //     message: 'All users deleted successfully',
+  //     data: null,
+  //   } as ApiResponse<DeleteResult>;
+  // }
 }

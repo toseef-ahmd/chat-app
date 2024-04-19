@@ -61,7 +61,7 @@ describe('UserController', () => {
       userService.create.mockResolvedValue({ ...newUserData, _id: 1 });
 
       await request(app.getHttpServer())
-        .post('/user')
+        .post('/users')
         .send(newUserData)
         .expect(HttpStatus.CREATED)
         .expect(({ body }) => {
@@ -75,7 +75,7 @@ describe('UserController', () => {
       const incompleteData = { username: 'test' }; // Missing required fields like email and password
 
       await request(app.getHttpServer())
-        .post('/user')
+        .post('/users')
         .send(incompleteData)
         .expect(HttpStatus.BAD_REQUEST)
         .expect(({ body }) => {
@@ -92,7 +92,7 @@ describe('UserController', () => {
       userService.findAll.mockResolvedValueOnce(users);
 
       await request(app.getHttpServer())
-        .get('/user')
+        .get('/users')
         .expect(HttpStatus.OK)
         .expect(({ body }) => {
           expect(body.data.length).toBe(1);
@@ -106,7 +106,7 @@ describe('UserController', () => {
       userService.findOne.mockResolvedValue(user);
 
       await request(app.getHttpServer())
-        .get('/user/1')
+        .get('/users/1')
         .expect(HttpStatus.FOUND)
         .expect(({ body }) => {
           expect(body.data.id).toBe(1);
@@ -119,7 +119,7 @@ describe('UserController', () => {
       userService.findOne.mockResolvedValue(null);
 
       await request(app.getHttpServer())
-        .get('/user/999')
+        .get('/users/999')
         .expect(HttpStatus.NOT_FOUND);
     });
   });
@@ -135,7 +135,7 @@ describe('UserController', () => {
       userService.update.mockResolvedValue(updatedUser);
 
       await request(app.getHttpServer())
-        .put('/user/1')
+        .put('/users/1')
         .send(updateData)
         .expect(HttpStatus.OK)
         .expect(({ body }) => {
@@ -147,7 +147,7 @@ describe('UserController', () => {
       userService.update.mockResolvedValue(null);
 
       await request(app.getHttpServer())
-        .put('/user/999')
+        .put('/users/999')
         .send({ email: 'doesnotmatter@example.com' })
         .expect(HttpStatus.NOT_FOUND);
     });
@@ -158,7 +158,7 @@ describe('UserController', () => {
       userService.remove.mockResolvedValue({ deletedCount: 1 });
 
       await request(app.getHttpServer())
-        .delete('/user/1')
+        .delete('/users/1')
         .expect(HttpStatus.OK)
         .expect(({ body }) => {
           expect(body.data).toBe(null);
@@ -169,7 +169,7 @@ describe('UserController', () => {
       userService.remove.mockResolvedValue({ deletedCount: 0 });
 
       await request(app.getHttpServer())
-        .delete('/user/999')
+        .delete('/users/999')
         .expect(HttpStatus.NOT_FOUND);
     });
   });
