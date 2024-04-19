@@ -17,6 +17,7 @@ import {
   import { ApiResponse } from '../interfaces/api-response.interface';
   import { DeleteResult } from 'mongodb';
   import { IMessage } from '../interfaces/message.interface';
+import { GetHyperLinks, Methods, Routes } from '../utilities/hypermedia.utility';
   
   @Controller('messages')
   export class MessageController {
@@ -32,6 +33,7 @@ import {
       return {
         statusCode: HttpStatus.CREATED,
         message: 'Message created successfully',
+        links: GetHyperLinks(Routes.Message, Methods.create),
         data: message as unknown as IMessage,
       };
     }
@@ -46,6 +48,7 @@ import {
       return {
         statusCode: HttpStatus.OK,
         message: 'Messages fetched successfully',
+        links: GetHyperLinks(Routes.Message, Methods.allMessages),
         data: messages as unknown as Array<IMessage>,
       };
     }
@@ -60,6 +63,7 @@ import {
       return {
         statusCode: HttpStatus.FOUND,
         message: 'Message fetched successfully',
+        links: GetHyperLinks(Routes.Message, Methods.read),
         data: message as unknown as IMessage,
       };
     }
@@ -74,6 +78,7 @@ import {
       return {
         statusCode: HttpStatus.OK,
         message: 'Message updated successfully',
+        links: GetHyperLinks(Routes.Message, Methods.update),
         data: updatedMessage as unknown as IMessage,
       };
     }
@@ -88,6 +93,7 @@ import {
       return {
         statusCode: HttpStatus.OK,
         message: 'Message deleted successfully',
+        links: GetHyperLinks(Routes.Message, Methods.delete),
         data: null,
       };
     }

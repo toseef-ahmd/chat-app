@@ -5,6 +5,11 @@ import { sign } from 'crypto';
 import { ApiResponse } from '../interfaces/api-response.interface';
 import { LoginDto } from './dto/auth-login.dto/auth-login.dto';
 import { SignupDTO } from './dto/auth-signup.dto/auth-signup.dto';
+import {
+  GetHyperLinks,
+  Methods,
+  Routes,
+} from '../utilities/hypermedia.utility';
 
 @Controller('auth')
 export class AuthController {
@@ -17,6 +22,7 @@ export class AuthController {
     return {
       statusCode: HttpStatus.OK,
       message: 'User logged in successfully',
+      links: GetHyperLinks(Routes.Auth, Methods.login),
       data: access_token,
     };
   }
@@ -28,6 +34,7 @@ export class AuthController {
     return {
       statusCode: HttpStatus.CREATED,
       message: 'User created successfully',
+      links: GetHyperLinks(Routes.Auth, Methods.signup),
       data: token,
     };
   }

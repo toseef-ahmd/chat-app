@@ -10,6 +10,12 @@ export enum UserStatus {
   Typing = 2,
 }
 
+export enum UserRoles {
+  User = 0,
+  Admin = 1,
+}
+
+
 @Schema()
 export class User {
   [x: string]: any;
@@ -38,7 +44,14 @@ export class User {
   })
   status: UserStatus;
 
-  @Prop([{ type: mongoose.Schema.Types.ObjectId, ref: 'User', default: []}])
+  @Prop({
+    type: Number,
+    enum: UserRoles,
+    default: UserRoles.User,
+  })
+  role: UserRoles;
+
+  @Prop(Array<{ type: mongoose.Schema.Types.ObjectId, ref: 'User', default: []}>)
   friends: Types.Array<Types.ObjectId>;
 }
 

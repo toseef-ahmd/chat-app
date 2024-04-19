@@ -4,7 +4,7 @@ import { UserService } from '../user/user.service';
 import { JwtService } from '@nestjs/jwt';
 import { NotFoundException, UnauthorizedException } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
-import { User, UserStatus } from '../user/schemas/user.schema';
+import { User, UserRoles, UserStatus } from '../user/schemas/user.schema';
 import mongoose from 'mongoose';
 
 describe('AuthService', () => {
@@ -55,6 +55,7 @@ describe('AuthService', () => {
         lastName: 'User',
         avatar: 'defaultAvatar.png',
         status: UserStatus.Online,
+        role: UserRoles.User,
         friends: new mongoose.Types.Array<mongoose.Types.ObjectId>(), // Simulate an empty array of friends
       };
 
@@ -123,6 +124,7 @@ describe('AuthService', () => {
         lastName: 'User',
         avatar: 'defaultAvatar.png',
         status: UserStatus.Online,
+        role: UserRoles.User,
         friends: new mongoose.Types.Array<mongoose.Types.ObjectId>(),
       };
       userService.findUserByEmail.mockResolvedValue(user);
@@ -151,6 +153,7 @@ describe('AuthService', () => {
         lastName: 'User',
         avatar: 'defaultAvatar.png',
         status: UserStatus.Online,
+        role: UserRoles.User,
         friends: new mongoose.Types.Array<mongoose.Types.ObjectId>(),
       };
       userService.findUserByEmail.mockResolvedValue(user);
@@ -181,6 +184,7 @@ describe('AuthService', () => {
         lastName: 'User',
         avatar: 'defaultAvatar.png',
         status: UserStatus.Online,
+        role: UserRoles.User,
         friends: new mongoose.Types.Array<mongoose.Types.ObjectId>(),
       };
 

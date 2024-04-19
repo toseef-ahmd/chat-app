@@ -82,11 +82,11 @@ describe('ChatController Functions Tests', () => {
       const result = await controller.create(dto);
 
       expect(mockChatService.create).toHaveBeenCalledWith(dto);
-      expect(result).toEqual({
-        statusCode: HttpStatus.CREATED,
-        message: 'Chat created successfully',
-        data: responseValue,
-      });
+      expect(result.statusCode).toEqual(HttpStatus.CREATED);
+      expect(result.message).toEqual('Chat created successfully');
+      expect(result.data).toEqual(responseValue);
+      expect(result.links).toBeDefined();
+
     });
 
     it('should throw a NotFoundException when chat creation fails', async () => {
@@ -133,13 +133,11 @@ describe('ChatController Functions Tests', () => {
       mockChatService.findAll.mockResolvedValueOnce(chatArray as never);
 
       const result = await controller.findAll();
-
+      expect(result.statusCode).toEqual(HttpStatus.OK);
+      expect(result.message).toEqual('Chats fetched successfully');
+      expect(result.data).toEqual(chatArray);
+      expect(result.links).toBeDefined();
       expect(mockChatService.findAll).toHaveBeenCalled();
-      expect(result).toEqual({
-        statusCode: HttpStatus.OK,
-        message: 'Chats fetched successfully',
-        data: chatArray,
-      });
     });
 
     it('should throw a NotFoundException when no chats are found', async () => {
@@ -152,11 +150,18 @@ describe('ChatController Functions Tests', () => {
   describe('Chat - FindOne', () => {
     it('should fetch a single chat by ID', async () => {
       const chatId = 'existing-id';
-      expect(await controller.findOne(chatId)).toEqual({
-        statusCode: HttpStatus.FOUND,
-        message: 'Chat fetched successfully',
-        data: { _id: chatId, type: 'direct', members: expect.any(Array) },
+
+      const result = await controller.findOne(chatId);
+
+      expect(result.statusCode).toEqual(HttpStatus.FOUND);
+      expect(result.message).toEqual('Chat fetched successfully');
+      expect(result.data).toEqual({
+        _id: chatId,
+        type: 'direct',
+        members: expect.any(Array),
       });
+      expect(result.links).toBeDefined();
+
       expect(mockChatService.findOne).toHaveBeenCalledWith(chatId);
     });
 
@@ -180,11 +185,13 @@ describe('ChatController Functions Tests', () => {
     it('should update a chat', async () => {
       const dto = { type: ChatType.Direct, members: [new ObjectId()] };
       const chatId = 'unique-chat-id';
-      expect(await controller.update(chatId, dto)).toEqual({
-        statusCode: HttpStatus.OK,
-        message: 'Chat updated successfully',
-        data: { _id: chatId, ...dto },
-      });
+
+      const result = await controller.update(chatId, dto);
+      expect(result.statusCode).toEqual(HttpStatus.OK);
+      expect(result.message).toEqual('Chat updated successfully');
+      expect(result.links).toBeDefined();
+      expect(result.data).toEqual({ _id: chatId, ...dto });
+
       expect(mockChatService.update).toHaveBeenCalledWith(chatId, dto);
     });
 
@@ -223,11 +230,11 @@ describe('ChatController Functions Tests', () => {
 
       const result = await controller.remove(chatId);
 
-      expect(result).toEqual({
-        statusCode: HttpStatus.OK,
-        message: 'Chat deleted successfully',
-        data: null,
-      });
+      expect(result.statusCode).toEqual(200);
+      expect(result.message).toEqual('Chat deleted successfully');
+      expect(result.data).toBe(null);
+      expect(result.links).toBeDefined();
+
       expect(mockChatService.remove).toHaveBeenCalledWith(chatId);
     });
 

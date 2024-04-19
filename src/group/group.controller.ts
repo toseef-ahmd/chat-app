@@ -14,9 +14,10 @@ import {
 import { GroupService } from './group.service';
 import { CreateGroupDto } from './dto/create-group.dto/create-group.dto';
 import { UpdateGroupDto } from './dto/update-group.dto/update-group.dto';
-import { ApiResponse } from 'src/interfaces/api-response.interface';
+import { ApiResponse } from '../interfaces/api-response.interface';
 import { DeleteResult } from 'mongodb';
-import { IGroup } from 'src/interfaces/group.interface';
+import { IGroup } from '../interfaces/group.interface';
+import { GetHyperLinks, Methods, Routes } from '../utilities/hypermedia.utility';
 
 @Controller('groups')
 export class GroupController {
@@ -34,13 +35,14 @@ export class GroupController {
     return {
       statusCode: HttpStatus.CREATED,
       message: 'Group created successfully',
+      links: GetHyperLinks(Routes.Group, Methods.create),
       data: group as unknown as IGroup,
     };
   }
 
   @Get()
   @HttpCode(HttpStatus.OK)
-  async findAll(): Promise<ApiResponse<IGroup[]>> {
+  async findAll(): Promise<ApiResponse<Array<IGroup>>> {
     const groups = await this.groupService.findAll();
     if (!groups || groups.length === 0) {
       throw new NotFoundException('No groups found');
@@ -48,6 +50,7 @@ export class GroupController {
     return {
       statusCode: HttpStatus.OK,
       message: 'Groups fetched successfully',
+      links: GetHyperLinks(Routes.Group, Methods.allGroups),
       data: groups as unknown as Array<IGroup>,
     };
   }
@@ -62,6 +65,7 @@ export class GroupController {
     return {
       statusCode: HttpStatus.FOUND,
       message: 'Group fetched successfully',
+      links: GetHyperLinks(Routes.Group, Methods.read),
       data: group as unknown as IGroup,
     };
   }
@@ -76,6 +80,7 @@ export class GroupController {
     return {
       statusCode: HttpStatus.OK,
       message: 'Group updated successfully',
+      links: GetHyperLinks(Routes.Group, Methods.update),
       data: updatedGroup as unknown as IGroup,
     };
   }
@@ -90,6 +95,7 @@ export class GroupController {
     return {
       statusCode: HttpStatus.OK,
       message: 'Group deleted successfully',
+      links: GetHyperLinks(Routes.Group, Methods.delete),
       data: null,
     } as ApiResponse<DeleteResult>;
   }

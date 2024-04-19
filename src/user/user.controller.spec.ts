@@ -26,7 +26,7 @@ describe('UserController Functions Tests', () => {
       if (id === 'existing-id') {
         return { _id: id, ...dto };
       } else {
-        throw new NotFoundException(`Group with ID ${id} not found`);
+        throw new NotFoundException(`User with ID ${id} not found`);
       }
     }),
     remove: jest.fn((id) => {
@@ -54,64 +54,92 @@ describe('UserController Functions Tests', () => {
     expect(controller).toBeDefined();
   });
 
-  describe('User - Create', () => {
-    it('should create a new user', async () => {
+  describe('create', () => {
+    it('should successfully create a user', async () => {
       const dto = {
         email: 'test@gmail.com',
         password: 'password',
         username: 'testuser',
       };
-      expect(await controller.create(dto)).toEqual({
-        statusCode: HttpStatus.CREATED,
-        message: 'User created successfully',
-        data: { _id: expect.any(String), ...dto },
+      mockUserService.create.mockResolvedValue({
+        _id: 'unique-id',
+        ...dto,
       });
+
+      const result = await controller.create(dto);
+      
       expect(mockUserService.create).toHaveBeenCalledWith(dto);
+      expect(result.statusCode).toEqual(HttpStatus.CREATED);
+      expect(result.message).toEqual('User created successfully');
+      expect(result.data).toEqual({
+        _id: 'unique-id',
+        ...dto,
+      });
+      expect(result.links).toBeDefined();
     });
 
-    it('should throw a not found exception when user already exists', async () => {
+    it('should throw NotFoundException when user already exists', async () => {
       const dto = {
         email: 'test@gmail.com',
         password: 'password',
         username: 'testuser',
       };
-
       mockUserService.create.mockRejectedValueOnce(
-        new Error('User already exists'),
-      );
-
-      await expect(controller.create(dto)).rejects.toThrow(
         new NotFoundException('User already exists'),
       );
+
+      await expect(controller.create(dto)).rejects.toThrow(NotFoundException);
     });
   });
 
-  describe('User - FindAll', () => {
-    it('should fetch all users', async () => {
-      expect(await controller.findAll()).toEqual({
-        statusCode: HttpStatus.OK,
-        message: 'Users fetched successfully',
-        data: [
-          { _id: 'unique-id1', email: 'user1@example.com' },
-          { _id: 'unique-id2', email: 'user2@example.com' },
-        ],
-      });
+  describe('findAll', () => {
+    it('should return an array of users', async () => {
+      const usersArray = [
+        { _id: 'unique-id1', email: 'user1@example.com' },
+        { _id: 'unique-id2', email: 'user2@example.com' },
+      ];
+      // mockUserService.findAll.mockResolvedValueOnce(usersArray as never);
+
+      const result = await controller.findAll();
+
+      expect(result.statusCode).toEqual(HttpStatus.OK);
+      expect(result.message).toEqual('Users fetched successfully');
+      expect(result.data).toEqual(usersArray);
+      expect(result.links).toBeDefined();
       expect(mockUserService.findAll).toHaveBeenCalled();
     });
+
+    it('should return empty array when no users are found', async () => {
+      mockUserService.findAll.mockResolvedValueOnce([] as never);
+
+      const result = await controller.findAll();
+
+      expect(result.statusCode).toEqual(HttpStatus.OK);
+      expect(result.message).toEqual('No users were found');
+      expect(result.data).toEqual([]);
+      expect(result.links).toBeDefined();
+
+    });
   });
 
-  describe('User - FindOne', () => {
+  describe('findOne', () => {
     it('should fetch a single user by ID', async () => {
       const userID = 'existing-id';
-      expect(await controller.findOne(userID)).toEqual({
-        statusCode: HttpStatus.FOUND,
-        message: 'User fetched successfully',
-        data: { _id: userID, email: 'user@example.com' },
+
+      const result = await controller.findOne(userID);
+
+      expect(result.statusCode).toEqual(HttpStatus.FOUND);
+      expect(result.message).toEqual('User fetched successfully');
+      expect(result.data).toEqual({
+        _id: userID,
+        email: 'user@example.com',
       });
+      expect(result.links).toBeDefined();
+
       expect(mockUserService.findOne).toHaveBeenCalledWith(userID);
     });
 
-    it('should throw a not found exception when user does not exist', async () => {
+    it('should throw a NotFoundException when user does not exist', async () => {
       const userID = 'non-existing-id';
       await expect(controller.findOne(userID)).rejects.toThrow(
         new NotFoundException(`User with ID ${userID} not found`),
@@ -119,41 +147,43 @@ describe('UserController Functions Tests', () => {
     });
   });
 
-  describe('User - Update', () => {
+  describe('update', () => {
     it('should update a user', async () => {
-      const dto = { email: 'updated@example.com' };
       const userID = 'existing-id';
-      expect(await controller.update(userID, dto)).toEqual({
-        statusCode: HttpStatus.OK,
-        message: 'User updated successfully',
-        data: { _id: userID, ...dto },
-      });
+      const dto = { email: 'updated@example.com' };
+
+      const result = await controller.update(userID, dto);
+      expect(result.statusCode).toEqual(HttpStatus.OK);
+      expect(result.message).toEqual('User updated successfully');
+      expect(result.data).toEqual({ _id: userID, ...dto });
+      expect(result.links).toBeDefined();
+
       expect(mockUserService.update).toHaveBeenCalledWith(userID, dto);
     });
 
-    it('should throw a not found exception when trying to Update a non-existing user', async () => {
+    it('should throw a NotFoundException when trying to update a non-existing user', async () => {
       const userID = 'non-existing-id';
-      await expect(controller.remove(userID)).rejects.toThrow(
+      await expect(controller.update(userID, {})).rejects.toThrow(
         new NotFoundException(`User with ID ${userID} not found`),
       );
     });
   });
 
-  describe('User - Remove', () => {
+  describe('remove', () => {
     it('should delete a user and return success', async () => {
       const userID = 'existing-id';
 
       const result = await controller.remove(userID);
 
-      expect(result).toEqual({
-        statusCode: HttpStatus.OK,
-        message: 'User deleted successfully',
-        data: null,
-      });
+      expect(result.statusCode).toEqual(HttpStatus.OK);
+      expect(result.message).toEqual('User deleted successfully');
+      expect(result.data).toBe(null);
+      expect(result.links).toBeDefined();
+
       expect(mockUserService.remove).toHaveBeenCalledWith(userID);
     });
 
-    it('should throw a not found exception when trying to delete a non-existing user', async () => {
+    it('should throw a NotFoundException when trying to delete a non-existing user', async () => {
       const userID = 'non-existing-id';
       await expect(controller.remove(userID)).rejects.toThrow(
         new NotFoundException(`User with ID ${userID} not found`),

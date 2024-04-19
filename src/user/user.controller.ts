@@ -14,9 +14,10 @@ import {
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto/update-user.dto';
-import { IUser } from 'src/interfaces/user.interface';
-import { ApiResponse } from 'src/interfaces/api-response.interface';
+import { IUser } from '../interfaces/user.interface';
+import { ApiResponse } from '../interfaces/api-response.interface';
 import { DeleteResult } from 'mongodb';
+import { GetHyperLinks, Methods, Routes } from '../utilities/hypermedia.utility';
 
 
 @Controller('users')
@@ -31,6 +32,7 @@ export class UserController {
     return {
       statusCode: HttpStatus.CREATED,
       message: 'User created successfully',
+      links: GetHyperLinks(Routes.User, Methods.create),
       data: user as unknown as IUser,
     };
   }
@@ -47,7 +49,8 @@ export class UserController {
 
     return {
       statusCode: HttpStatus.OK,
-      message: 'Users fetched successfully',
+      message: users.length > 0 ? 'Users fetched successfully' : 'No users were found',
+      links: GetHyperLinks(Routes.User, Methods.allUsers),
       data: users as unknown as Array<IUser>,
     };
   }
@@ -62,6 +65,7 @@ export class UserController {
         return {
             statusCode: HttpStatus.FOUND,
             message: 'User fetched successfully',
+            links: GetHyperLinks(Routes.User, Methods.read),
             data: user
         };
     }
@@ -76,6 +80,7 @@ export class UserController {
     return {
       statusCode: HttpStatus.OK,
       message: 'User updated successfully',
+      links: GetHyperLinks(Routes.User, Methods.update),
       data: user as unknown as IUser,
     } as ApiResponse<IUser>;
   }
@@ -90,6 +95,7 @@ export class UserController {
     return {
       statusCode: HttpStatus.OK,
       message: 'User deleted successfully',
+      links: GetHyperLinks(Routes.User, Methods.delete),
       data: null,
     } as ApiResponse<DeleteResult>;
   }

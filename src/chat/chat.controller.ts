@@ -17,6 +17,7 @@ import {
   import { ApiResponse } from '../interfaces/api-response.interface';
   import { IChat } from '../interfaces/chat.interface';
   import { DeleteResult } from 'mongodb';
+import { GetHyperLinks, Methods, Routes } from '../utilities/hypermedia.utility';
 
   
   @Controller('chats')
@@ -33,6 +34,7 @@ import {
       return {
         statusCode: HttpStatus.CREATED,
         message: 'Chat created successfully',
+        links: GetHyperLinks(Routes.Chat, Methods.create),
         data: chat,
       };
     }
@@ -47,6 +49,7 @@ import {
       return {
         statusCode: HttpStatus.OK,
         message: 'Chats fetched successfully',
+        links: GetHyperLinks(Routes.Chat, Methods.allChats),
         data: chats as unknown as Array<IChat>
       };
     }
@@ -64,6 +67,7 @@ import {
       return {
         statusCode: HttpStatus.FOUND,
         message: 'Chat fetched successfully',
+        links: GetHyperLinks(Routes.Chat, Methods.read),
         data: chat as unknown as IChat,
       };
     }
@@ -78,6 +82,7 @@ import {
       return {
         statusCode: HttpStatus.OK,
         message: 'Chat updated successfully',
+        links: GetHyperLinks(Routes.Chat, Methods.update),
         data: updatedChat as unknown as IChat,
       };
     }
@@ -92,6 +97,7 @@ import {
       return {
         statusCode: HttpStatus.OK,
         message: 'Chat deleted successfully',
+        links: GetHyperLinks(Routes.Chat, Methods.delete),
         data: null,
       };
     }

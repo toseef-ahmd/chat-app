@@ -40,13 +40,10 @@ describe('AuthController', () => {
       };
 
       const result = await controller.login(dto);
-
-      expect(mockAuthService.login).toHaveBeenCalledWith(dto);
-      expect(result).toEqual({
-        statusCode: HttpStatus.OK,
-        message: 'User logged in successfully',
-        data: 'mocked-token',
-      });
+      expect(result.links).toBeDefined();
+      expect(result.data).toEqual('mocked-token');
+      expect(result.statusCode).toEqual(HttpStatus.OK);
+      expect(result.message).toEqual('User logged in successfully');
     });
 
     it('should return a 401 error on invalid login', async () => {
@@ -76,24 +73,52 @@ describe('AuthController', () => {
         new UnauthorizedException(`Invalid Email`),
       );
     });
+  });
+  describe('signup', () => {
+    it('should return a token and success message on signup', async () => {
+      const dto: CreateUserDto = {
+        username: 'newuser',
+        email: 'new@example.com',
+        password: 'newpass123',
+      };
 
-    describe('signup', () => {
-      it('should return a token and success message on signup', async () => {
-        const dto: CreateUserDto = {
-          username: 'newuser',
-          email: 'new@example.com',
-          password: 'newpass123',
-        };
+      const result = await controller.signup(dto);
+      expect(mockAuthService.signup).toHaveBeenCalledWith(dto);
 
-        const result = await controller.signup(dto);
-        expect(mockAuthService.signup).toHaveBeenCalledWith(dto);
+      expect(result.statusCode).toEqual(HttpStatus.CREATED);
+      expect(result.data).toEqual('mocked-signup-token');
+      expect(result.message).toEqual('User created successfully');
+      expect(result.links).toBeDefined();
+    });
 
-        expect(result).toEqual({
-          statusCode: HttpStatus.CREATED,
-          message: 'User created successfully',
-          data: 'mocked-signup-token',
-        });
-      });
+    it('should return a 400 error on invalid email', async () => {
+      mockAuthService.login.mockRejectedValueOnce(new Error('Invalid Email'));
+
+      const dto = {
+        email: 'ac',
+        username: 'username',
+        password: 'password',
+      };
+
+      await expect(controller.login(dto)).rejects.toThrow(
+        new UnauthorizedException(`Invalid Email`),
+      );
+    });
+
+    it('should return a 400 error on missing password', async () => {
+      mockAuthService.login.mockRejectedValueOnce(
+        new Error('Password Required'),
+      );
+
+      const dto = {
+        email: 'ac@gmail.com',
+        username: 'username',
+        password: '',
+      };
+
+      await expect(controller.login(dto)).rejects.toThrow(
+        new UnauthorizedException(`Password Required`),
+      );
     });
   });
 });

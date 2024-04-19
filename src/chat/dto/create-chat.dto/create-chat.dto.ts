@@ -5,6 +5,7 @@ import {
   IsArray,
   ArrayNotEmpty,
   IsMongoId,
+  IsOptional,
 } from 'class-validator';
 import { ObjectId } from 'mongodb';
 import { MessageStatus } from '../../../message/schemas/message.schema';
@@ -48,6 +49,7 @@ export class CreateChatDto {
     required: false,
   })
   @IsMongoId()
+  @IsOptional()
   @ValidateIf((o) => o.type === ChatType.Group)
   group: string;
 }

@@ -64,37 +64,55 @@ describe('GroupController Functions Tests', () => {
         name: 'New Group',
         description: 'valid-description',
       };
-      expect(await controller.create(dto)).toEqual({
-        statusCode: HttpStatus.CREATED,
-        message: 'Group created successfully',
-        data: { _id: expect.any(String), ...dto },
-      });
+
+      const result = await controller.create(dto);
+      // expect(result).toBe(HttpStatus.CREATED);
+      expect(result.statusCode).toEqual(HttpStatus.CREATED);
+      expect(result.message).toEqual('Group created successfully');
+      expect(result.data).toEqual({ _id: expect.any(String), ...dto });
+      expect(result.links).toBeDefined();
       expect(mockGroupService.create).toHaveBeenCalledWith(dto);
     });
   });
 
   describe('Group - FindAll', () => {
     it('should fetch all groups', async () => {
-      expect(await controller.findAll()).toEqual({
-        statusCode: HttpStatus.OK,
-        message: 'Groups fetched successfully',
-        data: [
-          { _id: 'unique-group-id1', name: 'Group One' },
-          { _id: 'unique-group-id2', name: 'Group Two' },
-        ],
-      });
+      const result = await controller.findAll();
+      // expect(result).toBe(HttpStatus.OK);
+      expect(result.statusCode).toEqual(HttpStatus.OK);
+      expect(result.message).toEqual('Groups fetched successfully');
+      expect(result.data).toEqual([
+        { _id: 'unique-group-id1', name: 'Group One' },
+        { _id: 'unique-group-id2', name: 'Group Two' },
+      ]);
+      expect(result.links).toBeDefined();
       expect(mockGroupService.findAll).toHaveBeenCalled();
     });
+
+    // it('should return error if no groups were fetch', async () => {
+    //   const result = await controller.findAll();
+    //   // expect(result).toBe(HttpStatus.OK);
+    //   expect(result.statusCode).toEqual(HttpStatus.OK);
+    //   expect(result.message).toEqual('Groups fetched successfully');
+    //   expect(result.data).toEqual([
+    //     { _id: 'unique-group-id1', name: 'Group One' },
+    //     { _id: 'unique-group-id2', name: 'Group Two' },
+    //   ]);
+    //   expect(result.links).toBeDefined();
+    //   expect(mockGroupService.findAll).toHaveBeenCalled();
+    // });
   });
 
   describe('Group - FindOne', () => {
     it('should fetch a single group by ID', async () => {
       const groupId = 'existing-id';
-      expect(await controller.findOne(groupId)).toEqual({
-        statusCode: HttpStatus.FOUND,
-        message: 'Group fetched successfully',
-        data: { _id: groupId, name: 'Existing Group' },
-      });
+
+      const result = await controller.findOne(groupId);
+      // expect(result).toBe(HttpStatus.FOUND);
+      expect(result.statusCode).toEqual(HttpStatus.FOUND);
+      expect(result.message).toEqual('Group fetched successfully');
+      expect(result.data).toEqual({ _id: groupId, name: 'Existing Group' });
+      expect(result.links).toBeDefined();
       expect(mockGroupService.findOne).toHaveBeenCalledWith(groupId);
     });
 
@@ -110,11 +128,12 @@ describe('GroupController Functions Tests', () => {
     it('should update a group', async () => {
       const dto = { name: 'Updated Group' };
       const groupId = 'unique-group-id';
-      expect(await controller.update(groupId, dto)).toEqual({
-        statusCode: HttpStatus.OK,
-        message: 'Group updated successfully',
-        data: { _id: groupId, ...dto },
-      });
+      const result = await controller.update(groupId, dto);
+
+      expect(result.statusCode).toEqual(HttpStatus.OK);
+      expect(result.message).toEqual('Group updated successfully');
+      expect(result.data).toEqual({ _id: groupId, name: 'Updated Group' });
+      expect(result.links).toBeDefined();
       expect(mockGroupService.update).toHaveBeenCalledWith(groupId, dto);
     });
 
@@ -132,11 +151,10 @@ describe('GroupController Functions Tests', () => {
 
       const result = await controller.remove(groupId);
 
-      expect(result).toEqual({
-        statusCode: HttpStatus.OK,
-        message: 'Group deleted successfully',
-        data: null,
-      });
+      expect(result.statusCode).toEqual(HttpStatus.OK);
+      expect(result.message).toEqual('Group deleted successfully');
+      expect(result.data).toBe(null);
+      expect(result.links).toBeDefined();
       expect(mockGroupService.remove).toHaveBeenCalledWith(groupId);
     });
 
