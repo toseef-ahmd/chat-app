@@ -5,6 +5,7 @@ import { User, UserDocument } from './schemas/user.schema';
 import { DeleteResult } from 'mongodb';
 import { UpdateUserDto } from './dto/update-user.dto/update-user.dto';
 import { CreateUserDto } from './dto/create-user.dto/create-user.dto';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UserService {
@@ -16,6 +17,10 @@ export class UserService {
     return user || null;
   }
   async create(createUserDto: CreateUserDto): Promise<User> {
+
+    const hash: string = await bcrypt.hashSync(createUserDto.password, 10);
+
+    createUserDto.password = hash;
     const createdUser = await this.userModel.create(createUserDto);
 
     if (!createdUser) {

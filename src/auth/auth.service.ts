@@ -18,9 +18,7 @@ export class AuthService {
 
   // This method is used to sign up a user
   async signup(signup: CreateUserDto): Promise<string> {
-    const hash: string = await bcrypt.hashSync(signup.password, 10);
-
-    signup.password = hash;
+    
     const user = await this.userService.create(signup);
 
     if (!user) {
