@@ -1,5 +1,4 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { GetHyperLinks, Routes } from '../../../utilities/hypermedia.utility';
 
 class LinkDto {
   @ApiProperty({ example: '/users', description: 'Endpoint URL' })
@@ -104,7 +103,7 @@ export class UserUpdateResponseDto {
     isArray: true,
     description: 'Hypermedia links related to the operation',
   })
-  links: ;
+  links: LinksDto[];
 
   @ApiProperty({
     type: () => UserResponseDataDto,

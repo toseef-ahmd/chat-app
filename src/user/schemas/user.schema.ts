@@ -22,7 +22,7 @@ export class User {
   @Prop({ unique: true, required: true })
   username: string;
 
-  @Prop({ required: true })
+  @Prop({ required: true, select: false })
   password: string;
 
   @Prop({ unique: true, required: true })
