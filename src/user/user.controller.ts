@@ -38,7 +38,7 @@ export class UserController {
           statusCode: HttpStatus.CREATED,
           message: 'User created successfully',
           links: GetHyperLinks(Routes.User, Methods.create).map(link => new LinkDto(link.href, link.method)),
-          data: user
+          //data: user
       } as unknown as UserUpdateResponseDto;
 
     }

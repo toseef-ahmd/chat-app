@@ -34,7 +34,10 @@ export class ChatService {
   async findOne(chatId: string): Promise<Chat | null> {
     const chat = await this.chatModel
       .findById(chatId)
-      .populate('messages')
+      .populate({
+        path: 'messages',
+        model: 'Message',
+      })
       .exec();
 
     return chat || null;
