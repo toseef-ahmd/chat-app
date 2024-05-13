@@ -66,11 +66,14 @@ export class ChatService {
     await message.save();
 
     const chat = await this.chatModel.findById(chatId);
+
     if (!chat) {
       throw new NotFoundException(`Chat with ID ${chatId} not found`);
     }
 
     chat.messages.push(message._id);
+    chat.markModified('messages');
+
     await chat.save();
 
     return message;
