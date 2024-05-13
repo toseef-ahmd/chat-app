@@ -1,6 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-class LinkDto {
+// Assuming Link and LinksDto are imported or defined elsewhere
+
+export class LinkDto {
   @ApiProperty({ example: '/users', description: 'Endpoint URL' })
   href: string;
 
@@ -9,20 +11,32 @@ class LinkDto {
     description: 'HTTP method used for the endpoint',
   })
   method: string;
+
+  constructor(href: string, method: string) {
+    this.href = href;
+    this.method = method;
+  }
 }
 
-class LinksDto {
+export class LinksDto {
   @ApiProperty({
     type: () => LinkDto,
-    description: 'Link to the created user resource',
+    description: 'Link to the current resource',
   })
   self: LinkDto;
 
   @ApiProperty({
     type: () => LinkDto,
-    description: 'Link to the list of all users',
+    description: 'Link to the related resource',
   })
   allUsers: LinkDto;
+
+  constructor(links: any) {
+    this.self = new LinkDto(links.self.href, links.self.method);
+    if (links.allUsers) {
+      this.allUsers = new LinkDto(links.allUsers.href, links.allUsers.method);
+    }
+  }
 }
 
 export class UserResponseDataDto {

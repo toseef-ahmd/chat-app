@@ -20,7 +20,7 @@ import { DeleteResult } from 'mongodb';
 import { GetHyperLinks, Methods, Routes } from '../utilities/hypermedia.utility';
 import { ApiCreatedResponse, ApiOkResponse } from '@nestjs/swagger';
 import { User } from './schemas/user.schema';
-import { UserCreateResponseDto, UserUpdateResponseDto } from './dto/user.dto/user.dto';
+import { LinkDto, UserCreateResponseDto, UserUpdateResponseDto } from './dto/user.dto/user.dto';
 
 
 @Controller('users')
@@ -33,11 +33,11 @@ export class UserController {
     @ApiCreatedResponse({ description: 'Creates a new user and returns the data', type: UserCreateResponseDto })
     async create(@Body() createUserDto: CreateUserDto): Promise<UserCreateResponseDto> {
         const user = await this.userService.create(createUserDto);
-
+       
         return {
           statusCode: HttpStatus.CREATED,
           message: 'User created successfully',
-          links: GetHyperLinks(Routes.User, Methods.create),
+          links: GetHyperLinks(Routes.User, Methods.create).map(link => new LinkDto(link.href, link.method)),
           data: user
       } as unknown as UserUpdateResponseDto;
 
@@ -88,7 +88,7 @@ export class UserController {
     return {
       statusCode: HttpStatus.OK,
       message: 'User updated successfully',
-      links: GetHyperLinks(Routes.User, Methods.update),
+      links: GetHyperLinks(Routes.User, Methods.update).map(link => new LinkDto(link.href, link.method)),
       data: user
   } as unknown as UserUpdateResponseDto;
   //  return this.buildCreateUserResponse(user);

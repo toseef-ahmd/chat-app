@@ -9,10 +9,15 @@ import { Chat, ChatDocument } from './schemas/chat.schema';
 import { CreateChatDto } from './dto/create-chat.dto/create-chat.dto';
 import { UpdateChatDto } from './dto/update-chat.dto/update-chat.dto';
 import { DeleteResult } from 'mongodb';
+import { Message, MessageDocument } from 'src/message/schemas/message.schema';
+import { CreateMessageDto } from 'src/message/dto/create-message.dto/create-message.dto';
 
 @Injectable()
 export class ChatService {
-  constructor(@InjectModel(Chat.name) private chatModel: Model<ChatDocument>) {}
+  constructor(
+    @InjectModel(Chat.name) private chatModel: Model<ChatDocument>,
+    @InjectModel(Message.name) private messageModel: Model<MessageDocument>,
+  ) {}
 
   async create(createChatDto: CreateChatDto): Promise<Chat> {
     const createdChat = await this.chatModel.create(createChatDto);
@@ -27,7 +32,10 @@ export class ChatService {
   }
 
   async findOne(chatId: string): Promise<Chat | null> {
-    const chat = await this.chatModel.findById(chatId).exec();
+    const chat = await this.chatModel
+      .findById(chatId)
+      .populate('messages')
+      .exec();
 
     return chat || null;
   }
@@ -48,6 +56,24 @@ export class ChatService {
       throw new NotFoundException(`Message with ID ${chatId} not found`);
     }
     return result;
+  }
+
+  async addMessageToChat(
+    chatId: string,
+    createMessageDto: CreateMessageDto,
+  ): Promise<Message> {
+    const message = new this.messageModel(createMessageDto);
+    await message.save();
+
+    const chat = await this.chatModel.findById(chatId);
+    if (!chat) {
+      throw new NotFoundException(`Chat with ID ${chatId} not found`);
+    }
+
+    chat.messages.push(message._id);
+    await chat.save();
+
+    return message;
   }
 
   async removeAll(): Promise<DeleteResult | null> {

@@ -18,6 +18,8 @@ import {
   import { IChat } from '../interfaces/chat.interface';
   import { DeleteResult } from 'mongodb';
 import { GetHyperLinks, Methods, Routes } from '../utilities/hypermedia.utility';
+import { CreateMessageDto } from 'src/message/dto/create-message.dto/create-message.dto';
+import { IMessage } from 'src/interfaces/message.interface';
 
   
   @Controller('chats')
@@ -101,6 +103,26 @@ import { GetHyperLinks, Methods, Routes } from '../utilities/hypermedia.utility'
         data: null,
       };
     }
+
+  @Post(':id/message')
+  @HttpCode(HttpStatus.CREATED)
+  async addMessageToChat(
+    @Param('id') id: string,
+    @Body() createMessageDto: CreateMessageDto
+  ): Promise<ApiResponse<IMessage>> {
+    const message = await this.chatService.addMessageToChat(id, createMessageDto);
+
+    if (!message) {
+      throw new NotFoundException('Failed to create message');
+    }
+
+    return {
+      statusCode: HttpStatus.CREATED,
+      message: 'Message created and added to chat successfully',
+      links: GetHyperLinks(Routes.Chat, Methods.create),
+      // data: message as unknown as IMessage,
+    };
+  }
   
     // @Delete()
     // @HttpCode(HttpStatus.OK)
