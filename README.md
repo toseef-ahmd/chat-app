@@ -16,19 +16,35 @@ $ git clone https://github.com/toseef-ahmd/chat-app-backend
 
 ## Installation
 
-After you have cloned the repository, Navigate to chat-app-backend using
+After you have cloned the repository,
 
+### For running the backend
 ```bash
 $ cd chat-app-backend
+$ git checkout staging
 ```
 
 Run
 
 ```bash
 $ npm install
+$ npm run start:dev
 ```
 
 This will install the dependencies as defined in **_Package.json_** file.
+
+### For running the frontend
+```bash
+$ git checkout frontend
+$ cd frontend
+```
+
+Run
+
+```bash
+$ npm i
+$ npm run dev
+```
 
 ## Running the app
 
