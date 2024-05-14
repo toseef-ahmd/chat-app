@@ -28,11 +28,7 @@ export class ChatService {
   }
 
   async findAll(): Promise<Array<Chat>> {
-    return this.chatModel.find().populate({
-      path: 'members',
-      model: 'User', // The name of the User model
-      select: 'username', // Only populate the username field
-    }).exec();
+    return this.chatModel.find().exec();
   }
 
   async findOne(chatId: string): Promise<Chat | null> {
