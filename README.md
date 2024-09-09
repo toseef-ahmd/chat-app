@@ -14,6 +14,8 @@ Clone the code from [This Repository](https://github.com/toseef-ahmd/chat-app-ba
 $ git clone https://github.com/toseef-ahmd/chat-app-backend
 ```
 
+### Most of the development is in the staging branch. 
+
 ## Installation
 
 After you have cloned the repository, Navigate to chat-app-backend using
